@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { token } from "morgan";
+
 
 dotenv.config();
 console.log("insidel Controller")

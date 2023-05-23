@@ -23,8 +23,8 @@ app.use(errorHandler)
 
 
 
+app.use("/api/hostelAdmin", HostelAdminRouter);
  app.use("/api/superAdmin", superadminRouter);
- app.use("/api/hostelAdmin", HostelAdminRouter);
 // app.use("/api/student",  studentRouter);
 
 
