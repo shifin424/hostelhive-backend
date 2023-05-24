@@ -1,15 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import hostelAdmin from "../models/hostelAdmin.js";
-import { sendOtp,verifyOtp } from "../helpers/twilioOtp.js";
-
-
-
-
-
-
-
-
+import HostelAdmin from "../models/hostelAdmin.js";
+import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
 
 // export const siwsegnUp = async (req, res, next) => {
 //   const data = req.body;
@@ -29,7 +21,7 @@ import { sendOtp,verifyOtp } from "../helpers/twilioOtp.js";
 //       password: hashedPassword,
 //       mobile: data.mobileNumber,
 //       gender: data.gender,
-//       qualificaton: data.qualificaion,
+//       qualificaton: data.qualification,
 //       Address: [
 //         {
 //           landMark: data.landMark,
@@ -47,83 +39,126 @@ import { sendOtp,verifyOtp } from "../helpers/twilioOtp.js";
 //   }
 // };
 
-
 export const signUp = async (req, res, next) => {
-    try{
+  try {
+    const {
+      fullName,
+      email,
+      mobileNumber,
+      password,
+      landMark,
+      state,
+      area,
+      qualification,
+      gender,
+    } = req.body;
 
-        const { fullName, email, mobileNumber, password,landMark,state,area,qualificaion,gender } = req.body;
-        console.log(req.body)
+    if (
+      !fullName ||
+      !email ||
+      !mobileNumber ||
+      !password ||
+      !landMark ||
+      !state ||
+      !area ||
+      !qualification ||
+      !gender
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Please provide all required fields" });
+    }
 
-        if (!fullName || !email || !mobileNumber || !password || !landMark ||!state || !area || !qualificaion || !gender) {
-            return res.status(400).json({ error: 'Please provide all required fields' });
-          }
-
-          const AdminExists = await hostelAdmin.findOne({ email });
-      if (AdminExists) {
-        return res.status(400).json({ error: 'User already exists' });
-      }
-
-      const otpSend = await sendOtp(mobileNumber);
-      if (!otpSend) {
-        return res.status(500).json({ error: 'Failed to send OTP' });
-      }
-      return res.status(200).json({ success: true });
-      
-
-
-    }catch (err) {
-        next(err);
-        console.error(err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
-      
-}
-
-
+    const adminExistsByEmail = await HostelAdmin.findOne({ email });
+    if (adminExistsByEmail) {
+      return res.status(400).json({ error: "User with this email already exists" });
+    }
 
   
-  
-  
-  
-  export const otpVerification = async (req,res) => {
-    try {
-
-    const { fullName, email, mobileNumber, password,landMark,state,area,qualificaion,gender } = req.body;
+    const adminExistsByMobile = await HostelAdmin.findOne({ mobile:mobileNumber });
+    if (adminExistsByMobile) {
+      return res.status(400).json({ error: "User with this mobile number already exists" });
+    }
     
-    const otpVerify = await verifyOtp(mobileNumber, otpCode)
-    if (otpVerify.status == 'approved') {
-  
-        // Hash Password
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password, salt)
-  
-          // Create User
-        const hostelAdmin = await User.create({
-        fullName,email,mobileNumber,landMark,state,area,qualificaion,gender,
-        password: hashedPassword
-    })
-    if(hostelAdmin) {  
-        res.status(201).json({
-            _id: hostelAdmin.id,
-            fullName: hostelAdmin.name,
-            email: hostelAdmin.email,
-            mobileNumber: hostelAdmin.mobileNumber,
-            landMark:hostelAdmin.landMark,
-            state:hostelAdmin.state,
-            area:hostelAdmin.area,
-            qualificaion:hostelAdmin.qualificaion,
-            gender:hostelAdmin.gender
-        })
+
+    const otpSend = await sendOtp(mobileNumber);
+    if (!otpSend) {
+      return res.status(500).json({ error: "Failed to send OTP" });
     }
-    }else{
-        res.status(400)
-        throw new Error('Invalid OTP')
-    }
-    }catch (error) {
-        res.status(408).send({message: "Internal Server Error"}) 
-    }
+
+    // Create a JSON object containing all the data
+    const responseData = {
+      fullName,
+      email,
+      mobileNumber,
+      password,
+      landMark,
+      state,
+      area,
+      qualification,
+      gender,
+    };
+
+    return res.status(200).json(responseData);
+  } catch (err) {
+    next(err);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
+};
 
 
 
-
+export const otpVerification = async (req, res) => {
+  try {
+    const {
+      fullName,
+      email,
+       mobileNumber,
+      password,
+      landMark,
+      state,
+      area,
+      qualification,
+      gender,
+      otpCode,
+    } = req.body;
+    
+    const otpVerify = await verifyOtp(mobileNumber, otpCode);
+    if (otpVerify.status == "approved") {
+      // Hash Password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      
+      // Create User
+      const hostelAdmin = await HostelAdmin.create({
+        fullName,
+        email,
+        mobile: mobileNumber,
+        landMark,
+        state,
+        area,
+        qualification,
+        gender,
+        password: hashedPassword,
+      });
+      if (hostelAdmin) {
+        res.status(201).json({
+          _id: hostelAdmin.id,
+          fullName: hostelAdmin.name,
+          email: hostelAdmin.email,
+          mobileNumber: hostelAdmin.mobileNumber,
+          landMark: hostelAdmin.landMark,
+          state: hostelAdmin.state,
+          area: hostelAdmin.area,
+          qualification: hostelAdmin.qualification,
+          gender: hostelAdmin.gender,
+        });
+      }
+    } else {
+      res.status(401).json({message: "Invalid otp"})
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(408).send({ message: "Internal Server Error" });
+  }
+};

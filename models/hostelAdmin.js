@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const hosteladminSchema = new mongoose.Schema(
   {
@@ -46,7 +46,7 @@ const hosteladminSchema = new mongoose.Schema(
       type: String,
       default: "not Paid",
     },
-    qualificaton: {
+    qualification: {
       type: String,
       required: true,
     },

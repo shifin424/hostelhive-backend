@@ -9,17 +9,18 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSID, authToken);
 
 export const sendOtp = (mobileNumber) => {
+  console.log(serviceSID,5)
   console.log(mobileNumber);
+  const no=parseInt(mobileNumber)
+  console.log(typeof(no));
   return new Promise((resolve, reject) => {
-    console.log("reached to sendOtp");
     client.verify.v2
       .services(serviceSID)
       .verifications.create({
-        to: `+91${mobileNumber}`,
+        to: `+91${no}`,
         channel: "sms",
       })
       .then((result) => {
-        console.log(result.status);
         resolve(result);
       })
       .catch((error) => {
@@ -35,11 +36,14 @@ export const verifyOtp = (mobileNumber, otpCode) => {
       .verificationChecks.create({
         to: `+91${mobileNumber}`,
         code: otpCode,
+
       })
       .then((result) => {
+        console.log(result);
         resolve(result);
       })
       .catch((error) => {
+        console.log(error);
         reject({ status: error.status, message: error.message });
       });
   });
