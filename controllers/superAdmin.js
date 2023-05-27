@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-
 dotenv.config();
-console.log("insidel Controller")
+
+
+
 export const login = async (req, res, next) => {
   console.log(req.body)
   console.log("reached inside function")

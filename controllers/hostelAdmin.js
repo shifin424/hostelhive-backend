@@ -7,6 +7,8 @@ import jwt from "jsonwebtoken";
 
 dotenv.config();
 
+
+
 export const signUp = async (req, res, next) => {
   try {
     const { fullName, email, mobileNumber, password, qualification, gender } =
@@ -43,10 +45,10 @@ export const signUp = async (req, res, next) => {
         .json({ error: "User with this mobile number already exists" });
     }
 
-    // const otpSend = await sendOtp(mobileNumber);
-    // if (!otpSend) {
-    //   return res.status(500).json({ error: "Failed to send OTP" });
-    // }
+    const otpSend = await sendOtp(mobileNumber);
+    if (!otpSend) {
+      return res.status(500).json({ error: "Failed to send OTP" });
+    }
 
     const token = jwt.sign(
       { email, mobileNumber },
@@ -88,7 +90,7 @@ export const otpVerification = async (req, res) => {
 
     const decoded = jwt.verify(token, process.env.OTP_JWT_SECRET);
 
-    console.log(decoded, "heyyyyyyyy++");
+    console.log(decoded, "checked");
 
     if (!decoded.email || !decoded.mobileNumber) {
       res.status(401).json({
@@ -97,9 +99,9 @@ export const otpVerification = async (req, res) => {
       });
     }
 
-    // const otpVerify = await verifyOtp(mobileNumber, otpCode);
-    // if (otpVerify.status == "approved") {
-    if (otpCode == 123456) {
+    const otpVerify = await verifyOtp(mobileNumber, otpCode);
+    if (otpVerify.status == "approved") {
+      // if (otpCode == 123456) {
       // Hash Password
 
       const adminExistsByEmail = await HostelAdmin.findOne({ email });
@@ -123,7 +125,6 @@ export const otpVerification = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      // Create User
       const hostelAdmin = await HostelAdmin.create({
         fullName,
         email,
@@ -151,7 +152,6 @@ export const otpVerification = async (req, res) => {
   }
 };
 
-//Hostel Admin
 export const login = async (req, res) => {
   const { email, password } = req.body;
   console.log(email, password);
@@ -190,3 +190,7 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const addHostel = async (req, res, next) => {
+  console.log(req.body)
+}

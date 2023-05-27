@@ -8,10 +8,11 @@ const accountSID = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = twilio(accountSID, authToken);
 
+
 export const sendOtp = (mobileNumber) => {
   console.log(serviceSID,5)
   console.log(mobileNumber);
-  const no=parseInt(mobileNumber)
+  const no = parseInt(mobileNumber)
   console.log(typeof(no));
   return new Promise((resolve, reject) => {
     client.verify.v2
@@ -36,7 +37,6 @@ export const verifyOtp = (mobileNumber, otpCode) => {
       .verificationChecks.create({
         to: `+91${mobileNumber}`,
         code: otpCode,
-
       })
       .then((result) => {
         console.log(result);

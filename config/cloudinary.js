@@ -1,5 +1,5 @@
 import cloudinary from 'cloudinary'
-import cloudinaryStorage from 'multer-storage-cloudinary'
+import {CloudinaryStorage} from 'multer-storage-cloudinary'
 import multer from 'multer'
 import dotenv from 'dotenv'
 
@@ -11,7 +11,7 @@ cloudinary.config({
     api_secret: process.env.API_SECRET
   });
 
-  const storage = new cloudinaryStorage({
+  const storage = new CloudinaryStorage({
     cloudinary,
     params: {
       folder: "HostelHive",
