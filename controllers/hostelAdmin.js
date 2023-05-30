@@ -1,48 +1,30 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import HostelAdmin from "../models/hostelAdmin.js";
-import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
 import jwt from "jsonwebtoken";
+import HostelAdmin from "../models/hostelAdmin.js";
+import HostelInfo from '../models/hostelInfo.js';
+import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
 
 dotenv.config();
 
-
-
 export const signUp = async (req, res, next) => {
   try {
-    const { fullName, email, mobileNumber, password, qualification, gender } =
-      req.body;
+    const { fullName, email, mobileNumber, password, qualification, gender } = req.body;
 
-    if (
-      !fullName ||
-      !email ||
-      !mobileNumber ||
-      !password ||
-      !qualification ||
-      !gender
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Please provide all required fields" });
+
+    if (!fullName || !email || !mobileNumber || !password || !qualification || !gender) {
+      return res.status(400).json({ error: "Please provide all required fields" });
     }
 
     const adminExistsByEmail = await HostelAdmin.findOne({ email });
     if (adminExistsByEmail) {
-      return res
-        .status(400)
-        .json({ error: "User with this email already exists" });
+      return res.status(400).json({ error: "User with this email already exists" });
     }
 
-    console.log(mobileNumber);
-    const adminExistsByMobile = await HostelAdmin.findOne({
-      mobile: mobileNumber,
-    });
-
+    const adminExistsByMobile = await HostelAdmin.findOne({ mobile: mobileNumber });
     if (adminExistsByMobile) {
-      return res
-        .status(400)
-        .json({ error: "User with this mobile number already exists" });
+      return res.status(400).json({ error: "User with this mobile number already exists" });
     }
 
     const otpSend = await sendOtp(mobileNumber);
@@ -50,13 +32,9 @@ export const signUp = async (req, res, next) => {
       return res.status(500).json({ error: "Failed to send OTP" });
     }
 
-    const token = jwt.sign(
-      { email, mobileNumber },
-      process.env.OTP_JWT_SECRET,
-      {
-        expiresIn: "3d",
-      }
-    );
+    const token = jwt.sign({ email, mobileNumber }, process.env.OTP_JWT_SECRET, {
+      expiresIn: "3d",
+    });
 
     const responseData = {
       fullName,
@@ -88,6 +66,7 @@ export const otpVerification = async (req, res) => {
       token,
     } = req.body;
 
+
     const decoded = jwt.verify(token, process.env.OTP_JWT_SECRET);
 
     console.log(decoded, "checked");
@@ -101,9 +80,6 @@ export const otpVerification = async (req, res) => {
 
     const otpVerify = await verifyOtp(mobileNumber, otpCode);
     if (otpVerify.status == "approved") {
-      // if (otpCode == 123456) {
-      // Hash Password
-
       const adminExistsByEmail = await HostelAdmin.findOne({ email });
       if (adminExistsByEmail) {
         return res
@@ -111,7 +87,6 @@ export const otpVerification = async (req, res) => {
           .json({ error: "User with this email already exists" });
       }
 
-      console.log(mobileNumber);
       const adminExistsByMobile = await HostelAdmin.findOne({
         mobile: mobileNumber,
       });
@@ -158,7 +133,8 @@ export const login = async (req, res) => {
 
   try {
     const admin = await HostelAdmin.findOne({ email: email });
-    console.log(admin);
+
+
     if (!admin) {
       return res.status(404).json({ message: "No User Found" });
     }
@@ -192,5 +168,44 @@ export const login = async (req, res) => {
 };
 
 export const addHostel = async (req, res, next) => {
-  console.log(req.body)
-}
+
+
+  try {
+    const { hostelName, lat, lng, hostelImage,url, description, token } = req.body;
+
+    console.log(hostelName, lat, lng, hostelImage, description, token)
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const hostelAdmin = await HostelAdmin.findOne({ _id: decoded.id });
+
+    const existingHostel = await HostelInfo.findOne({ hostelName });
+    if (existingHostel) {
+      return res.status(400).json({ message: "Hostel name already exists" });
+    }
+
+    const newHostelInfo = await HostelInfo({
+      hostelName,
+      lat,
+      lng,
+      description,
+      hostelImage: {
+        url: hostelImage.url,
+        filename: hostelImage.filename,
+      },
+    });
+
+    const savedHostelInfo = await newHostelInfo.save();
+
+    hostelAdmin.hosteldata.push({
+      hostelId: savedHostelInfo._id,
+      hostelName: savedHostelInfo,
+    });
+    await hostelAdmin.save();
+
+    res.status(200).json({ message: "success", hostelAdmin });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

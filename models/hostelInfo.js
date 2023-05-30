@@ -1,48 +1,46 @@
-import mongoose from "mongoose";
+// hostelInfo model
+import mongoose from 'mongoose';
 
 const hostelInfoSchema = new mongoose.Schema(
-
-    {
-        hostelName:{
-            type:String,
-            required :true
-        },
-        location: {
-            type: {
-              type: String,
-              enum: ['Point'],
-              required: true,
-            },
-            coordinates: {
-              type: [Number],
-              required: true,
-            },
-          },
-        rooms:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:'rooms',
-            required:true
-        },
-        descripton:{
-            type:String,
-            requred:true
-        },
-        hostelImage:{
-            url: {
-                type: String,
-              },
-              filename: {
-                type: String,
-              },
-        },hostelReviews:{
-            type:mongoose.Schema.Types.ObjectId,
-            ref:'reviews'
-        }
-        
+  {
+    hostelName: {
+      type: String,
+      required: true,
     },
-    { timestamps: true }
-)
+    lat: Number,
+    lng: Number,
+    rooms: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'rooms',
+    },
+    isApproved:{
+      type:Boolean,
+      default:false
+    },
+    isBlocked:{
+      type:Boolean,
+      default:false
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    hostelImage: {
+      url: {
+        type: String,
+      },
+      filename: {
+        type: String,
+      },
+    },
+    hostelReviews: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'reviews',
+    },
+  },
+  { timestamps: true }
+);
 
-const hoselInfo = mongoose.model("hoselInfo",hostelInfoSchema)
+const HostelInfo = mongoose.model('HostelInfo', hostelInfoSchema);
 
-export default hoselInfo
+export default HostelInfo;

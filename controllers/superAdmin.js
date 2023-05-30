@@ -42,3 +42,14 @@ export const login = async (req, res, next) => {
     res.json({ errors: error });
   }
 };
+
+
+export const requests = async (req,res,next)=>{
+try{
+
+  
+}catch(err){
+  console.log(err)
+  next(err)
+}
+};

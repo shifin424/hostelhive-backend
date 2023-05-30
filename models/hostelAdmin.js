@@ -38,10 +38,10 @@ const hosteladminSchema = new mongoose.Schema(
         type: String,
       },
     },
-    isApproved: {
-      type: Boolean,
-      default: false,
-    },
+    status: {
+      type: String,
+      default: "Guest",
+    }, 
     paymentStatus: {
       type: String,
       default: "not Paid",
