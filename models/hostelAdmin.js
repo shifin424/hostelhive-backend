@@ -1,19 +1,26 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const hosteladminSchema = new mongoose.Schema(
   {
-    hosteldata: [
-      {
-        hostelId: {
-          type: String,
-          required: true,
+    hosteldata: {
+      type: [
+        {
+          hostelId: {
+            type: String,
+            required: true,
+          },
+          hostelName: {
+            type: String,
+            required: true,
+          },
         },
-        hostelName: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
+      ],
+      required: true,
+    },
+    fullName: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
@@ -41,7 +48,7 @@ const hosteladminSchema = new mongoose.Schema(
     status: {
       type: String,
       default: "Guest",
-    }, 
+    },
     paymentStatus: {
       type: String,
       default: "not Paid",
@@ -66,6 +73,6 @@ const hosteladminSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const hosteladmin = mongoose.model("hostelAdmin", hosteladminSchema);
+const HostelAdmin = mongoose.model('HostelAdmin', hosteladminSchema);
 
-export default hosteladmin;
+export default HostelAdmin;

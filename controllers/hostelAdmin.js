@@ -11,6 +11,7 @@ dotenv.config();
 export const signUp = async (req, res, next) => {
   try {
     const { fullName, email, mobileNumber, password, qualification, gender } = req.body;
+    console.log(fullName,"heyyyyyyyyy")
 
 
     if (!fullName || !email || !mobileNumber || !password || !qualification || !gender) {
@@ -111,7 +112,7 @@ export const otpVerification = async (req, res) => {
       if (hostelAdmin) {
         res.status(201).json({
           _id: hostelAdmin.id,
-          fullName: hostelAdmin.name,
+          fullName: hostelAdmin.fullName,
           email: hostelAdmin.email,
           mobileNumber: hostelAdmin.mobileNumber,
           qualification: hostelAdmin.qualification,
@@ -171,13 +172,19 @@ export const addHostel = async (req, res, next) => {
 
 
   try {
-    const { hostelName, lat, lng, hostelImage,url, description, token } = req.body;
+    const { hostelName, lat, lng, url, description, token,adminId } = req.body;
 
-    console.log(hostelName, lat, lng, hostelImage, description, token)
+    console.log(hostelName, lat, lng, url, description, token)
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const hostelAdmin = await HostelAdmin.findOne({ _id: decoded.id });
+    console.log("tokenmmmmmmmmmmmmmmmmmm"+decoded);
+             
+ 
+
+    const hostelAdmin = await HostelAdmin.findOne({ _id: adminId });
+
+    console.log(hostelAdmin.id) 
 
     const existingHostel = await HostelInfo.findOne({ hostelName });
     if (existingHostel) {
@@ -190,16 +197,17 @@ export const addHostel = async (req, res, next) => {
       lng,
       description,
       hostelImage: {
-        url: hostelImage.url,
-        filename: hostelImage.filename,
+        url: url,
+       
       },
+      adminData:hostelAdmin.id
     });
 
     const savedHostelInfo = await newHostelInfo.save();
 
     hostelAdmin.hosteldata.push({
       hostelId: savedHostelInfo._id,
-      hostelName: savedHostelInfo,
+      hostelName: savedHostelInfo.hostelName,
     });
     await hostelAdmin.save();
 

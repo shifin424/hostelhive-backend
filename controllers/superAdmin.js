@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+import HostelInfo from "../models/hostelInfo.js";
 
 dotenv.config();
 
@@ -44,12 +45,21 @@ export const login = async (req, res, next) => {
 };
 
 
-export const requests = async (req,res,next)=>{
-try{
 
-  
-}catch(err){
-  console.log(err)
-  next(err)
-}
+
+export const requests = async (req, res, next) => {
+  try {
+    const result = await HostelInfo.find()
+    .populate({
+      path: "adminData",
+      select: "fullName mobile email",
+    })
+      .select("hostelName hostelImage description adminData");
+
+    console.log(result);
+    res.json(result);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
 };

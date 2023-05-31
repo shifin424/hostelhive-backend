@@ -1,4 +1,3 @@
-// hostelInfo model
 import mongoose from 'mongoose';
 
 const hostelInfoSchema = new mongoose.Schema(
@@ -13,13 +12,13 @@ const hostelInfoSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'rooms',
     },
-    isApproved:{
-      type:Boolean,
-      default:false
+    isApproved: {
+      type: String,
+      default: "Pending"
     },
-    isBlocked:{
-      type:Boolean,
-      default:false
+    isBlocked: {
+      type: Boolean,
+      default: false
     },
     description: {
       type: String,
@@ -37,6 +36,12 @@ const hostelInfoSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'reviews',
     },
+    adminData: 
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'HostelAdmin',
+      },
+    
   },
   { timestamps: true }
 );
