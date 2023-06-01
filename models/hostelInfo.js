@@ -25,12 +25,17 @@ const hostelInfoSchema = new mongoose.Schema(
       required: true,
     },
     hostelImage: {
-      url: {
+
+      public_id: {
         type: String,
       },
-      filename: {
-        type: String,
-      },
+      url:{
+        type:String
+      }
+   
+    },
+    location:{
+      type:String
     },
     hostelReviews: {
       type: mongoose.Schema.Types.ObjectId,

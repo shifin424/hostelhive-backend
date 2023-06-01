@@ -38,12 +38,12 @@ const hosteladminSchema = new mongoose.Schema(
       required: true,
     },
     adminImage: {
-      url: {
+      public_id: {
         type: String,
       },
-      filename: {
-        type: String,
-      },
+      url:{
+        type:String
+      }
     },
     status: {
       type: String,

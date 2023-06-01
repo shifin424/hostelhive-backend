@@ -172,46 +172,44 @@ export const addHostel = async (req, res, next) => {
 
 
   try {
-    const { hostelName, lat, lng, url, description, token,adminId } = req.body;
+    //  const { title, lat, lng, url, description, token,adminId ,public_id} = req.body;
+    console.log(req.body)
 
-    console.log(hostelName, lat, lng, url, description, token)
+    // console.log(hostelName, lat, lng, url, description ,adminId,public_id)
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    console.log("tokenmmmmmmmmmmmmmmmmmm"+decoded);
-             
- 
+    // const hostelAdmin = await HostelAdmin.findOne({ _id: adminId });
 
-    const hostelAdmin = await HostelAdmin.findOne({ _id: adminId });
+    // console.log(hostelAdmin.id) 
 
-    console.log(hostelAdmin.id) 
+    // const existingHostel = await HostelInfo.findOne({ hostelName });
+    // if (existingHostel) {
+    //   return res.status(400).json({ message: "Hostel name already exists" });
+    // }
 
-    const existingHostel = await HostelInfo.findOne({ hostelName });
-    if (existingHostel) {
-      return res.status(400).json({ message: "Hostel name already exists" });
-    }
+    // const newHostelInfo = await HostelInfo({
+    //   hostelName,
+    //   lat,
+    //   lng,
+    //   description,
+    //   location,
+    //   hostelImage: {
+    //     public_id,
+    //     url:url,
+    //   },
+    //   adminData: hostelAdmin.id
+    // });
+    
 
-    const newHostelInfo = await HostelInfo({
-      hostelName,
-      lat,
-      lng,
-      description,
-      hostelImage: {
-        url: url,
-       
-      },
-      adminData:hostelAdmin.id
-    });
+    // const savedHostelInfo = await newHostelInfo.save();
 
-    const savedHostelInfo = await newHostelInfo.save();
+    // hostelAdmin.hosteldata.push({
+    //   hostelId: savedHostelInfo._id,
+    //   hostelName: savedHostelInfo.hostelName,
+    // });
+    // await hostelAdmin.save();
 
-    hostelAdmin.hosteldata.push({
-      hostelId: savedHostelInfo._id,
-      hostelName: savedHostelInfo.hostelName,
-    });
-    await hostelAdmin.save();
-
-    res.status(200).json({ message: "success", hostelAdmin });
+    // res.status(200).json({ message: "success", hostelAdmin });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Internal Server Error" });

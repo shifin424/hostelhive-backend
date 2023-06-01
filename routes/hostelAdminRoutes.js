@@ -15,7 +15,7 @@ hosteladminRouter.post('/verifyOtp',otpVerification)
 
 hosteladminRouter.post('/postLogin',login)
 
-hosteladminRouter.post('/addHostel',addHostel)
+hosteladminRouter.post('/add-Hostel',uploadMiddleware,addHostel)
 
 
 export default hosteladminRouter;
