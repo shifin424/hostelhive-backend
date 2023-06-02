@@ -54,7 +54,7 @@ export const requests = async (req, res, next) => {
       path: "adminData",
       select: "fullName mobile email",
     })
-      .select("hostelName hostelImage description adminData");
+      .select("hostelName hostelImage location description adminData");
 
     console.log(result);
     res.json(result);
@@ -63,3 +63,16 @@ export const requests = async (req, res, next) => {
     next(err);
   }
 };
+
+
+
+export const approval = async (req,res,next)=>{
+  try{
+
+    res.status(200).json({message:success})
+
+
+  }catch(err){
+    console.log(err)
+  }
+}

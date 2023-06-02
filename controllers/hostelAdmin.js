@@ -11,7 +11,7 @@ dotenv.config();
 export const signUp = async (req, res, next) => {
   try {
     const { fullName, email, mobileNumber, password, qualification, gender } = req.body;
-    console.log(fullName,"heyyyyyyyyy")
+    console.log(fullName, "heyyyyyyyyy")
 
 
     if (!fullName || !email || !mobileNumber || !password || !qualification || !gender) {
@@ -172,44 +172,41 @@ export const addHostel = async (req, res, next) => {
 
 
   try {
-    //  const { title, lat, lng, url, description, token,adminId ,public_id} = req.body;
-    console.log(req.body)
+    const Admin = JSON.parse(req.headers.authorization)
+    const { title, location, description, latitude, longitude } = req.body;
+    const { path, filename } = req.file
 
-    // console.log(hostelName, lat, lng, url, description ,adminId,public_id)
+    const hostelAdmin = await HostelAdmin.findOne({ _id: Admin.id });
 
+    const existingHostel = await HostelInfo.findOne({ hostelName: title });
+    if (existingHostel) {
+      return res.status(400).json({ message: "Hostel name already exists" });
+    }
 
-    // const hostelAdmin = await HostelAdmin.findOne({ _id: adminId });
+    const newHostelInfo = await HostelInfo({
+      hostelName: title,
+      lat: latitude,
+      lng: longitude,
+      description: description,
+      location: location,
+      hostelImage: {
+        public_id: filename,
+        url: path,
+      },
+      adminData: Admin.id
+    });
 
-    // console.log(hostelAdmin.id) 
+    const savedHostelInfo = await newHostelInfo.save();
 
-    // const existingHostel = await HostelInfo.findOne({ hostelName });
-    // if (existingHostel) {
-    //   return res.status(400).json({ message: "Hostel name already exists" });
-    // }
+    hostelAdmin.hosteldata.push({
+      hostelId: savedHostelInfo._id,
+      hostelName: savedHostelInfo.hostelName,
+    });
+    await hostelAdmin.save();
 
-    // const newHostelInfo = await HostelInfo({
-    //   hostelName,
-    //   lat,
-    //   lng,
-    //   description,
-    //   location,
-    //   hostelImage: {
-    //     public_id,
-    //     url:url,
-    //   },
-    //   adminData: hostelAdmin.id
-    // });
-    
+    console.log(hostelAdmin,"=================");
 
-    // const savedHostelInfo = await newHostelInfo.save();
-
-    // hostelAdmin.hosteldata.push({
-    //   hostelId: savedHostelInfo._id,
-    //   hostelName: savedHostelInfo.hostelName,
-    // });
-    // await hostelAdmin.save();
-
-    // res.status(200).json({ message: "success", hostelAdmin });
+    res.status(200).json({ message: "success", hostelAdmin });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Internal Server Error" });
