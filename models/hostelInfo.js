@@ -14,39 +14,36 @@ const hostelInfoSchema = new mongoose.Schema(
     },
     isApproved: {
       type: String,
-      default: "Pending"
+      enum: ['Pending', 'Approved', 'Rejected'],
+      default: 'Pending',
     },
     isBlocked: {
       type: Boolean,
-      default: false
+      default: false,
     },
     description: {
       type: String,
       required: true,
     },
     hostelImage: {
-
       public_id: {
         type: String,
       },
-      url:{
-        type:String
-      }
-   
+      url: {
+        type: String,
+      },
     },
-    location:{
-      type:String
+    location: {
+      type: String,
     },
     hostelReviews: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'reviews',
     },
-    adminData: 
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'HostelAdmin',
-      },
-    
+    adminData: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'HostelAdmin',
+    },
   },
   { timestamps: true }
 );

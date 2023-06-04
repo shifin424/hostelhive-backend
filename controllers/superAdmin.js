@@ -49,14 +49,13 @@ export const login = async (req, res, next) => {
 
 export const requests = async (req, res, next) => {
   try {
-    const result = await HostelInfo.find()
-    .populate({
-      path: "adminData",
-      select: "fullName mobile email",
-    })
+    const result = await HostelInfo.find({ isApproved: 'Pending' })
+      .populate({
+        path: "adminData",
+        select: "fullName mobile email",
+      })
       .select("hostelName hostelImage location description adminData");
-
-    console.log(result);
+      console.log(result);
     res.json(result);
   } catch (err) {
     console.log(err);
@@ -66,13 +65,51 @@ export const requests = async (req, res, next) => {
 
 
 
-export const approval = async (req,res,next)=>{
+
+export const approval = async (req, res, next) => {
+  console.log(req.params.id);
+  try {
+    const Id = req.params.id.trim();
+
+    const hostelData = await HostelInfo.findOne({ _id: Id });
+
+    if (hostelData.isApproved === 'Pending') {
+      hostelData.isApproved = 'Approved';
+      await hostelData.save();
+
+      const success = "Hostel approved";
+      res.status(200).json({ message: success });
+    } else {
+      const success = "Hostel is already approved";
+      res.status(200).json({ message: success });
+    }
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
+
+export const rejected = async (req,res,next)=>{
   try{
 
-    res.status(200).json({message:success})
+    const Id = req.params.id.trim();
 
+    const hostelData = await HostelInfo.findOne({ _id: Id });
+
+    if (hostelData.isApproved === 'Pending') {
+      hostelData.isApproved = 'Rejected';
+      await hostelData.save();
+
+      const success = "Hostel Rejected";
+      res.status(200).json({ message: success });
+    } else {
+      const success = "Hostel is already Rejected";
+      res.status(200).json({ message: success });
+    }
 
   }catch(err){
-    console.log(err)
+    console.log(err);
+    next(err)
   }
 }

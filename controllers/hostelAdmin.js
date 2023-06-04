@@ -3,29 +3,44 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import HostelAdmin from "../models/hostelAdmin.js";
-import HostelInfo from '../models/hostelInfo.js';
+import HostelInfo from "../models/hostelInfo.js";
 import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
 
 dotenv.config();
 
 export const signUp = async (req, res, next) => {
   try {
-    const { fullName, email, mobileNumber, password, qualification, gender } = req.body;
-    console.log(fullName, "heyyyyyyyyy")
+    const { fullName, email, mobileNumber, password, qualification, gender } =
+      req.body;
+    console.log(fullName, "heyyyyyyyyy");
 
-
-    if (!fullName || !email || !mobileNumber || !password || !qualification || !gender) {
-      return res.status(400).json({ error: "Please provide all required fields" });
+    if (
+      !fullName ||
+      !email ||
+      !mobileNumber ||
+      !password ||
+      !qualification ||
+      !gender
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Please provide all required fields" });
     }
 
     const adminExistsByEmail = await HostelAdmin.findOne({ email });
     if (adminExistsByEmail) {
-      return res.status(400).json({ error: "User with this email already exists" });
+      return res
+        .status(400)
+        .json({ error: "User with this email already exists" });
     }
 
-    const adminExistsByMobile = await HostelAdmin.findOne({ mobile: mobileNumber });
+    const adminExistsByMobile = await HostelAdmin.findOne({
+      mobile: mobileNumber,
+    });
     if (adminExistsByMobile) {
-      return res.status(400).json({ error: "User with this mobile number already exists" });
+      return res
+        .status(400)
+        .json({ error: "User with this mobile number already exists" });
     }
 
     const otpSend = await sendOtp(mobileNumber);
@@ -33,9 +48,13 @@ export const signUp = async (req, res, next) => {
       return res.status(500).json({ error: "Failed to send OTP" });
     }
 
-    const token = jwt.sign({ email, mobileNumber }, process.env.OTP_JWT_SECRET, {
-      expiresIn: "3d",
-    });
+    const token = jwt.sign(
+      { email, mobileNumber },
+      process.env.OTP_JWT_SECRET,
+      {
+        expiresIn: "3d",
+      }
+    );
 
     const responseData = {
       fullName,
@@ -66,7 +85,6 @@ export const otpVerification = async (req, res) => {
       otpCode,
       token,
     } = req.body;
-
 
     const decoded = jwt.verify(token, process.env.OTP_JWT_SECRET);
 
@@ -135,7 +153,6 @@ export const login = async (req, res) => {
   try {
     const admin = await HostelAdmin.findOne({ email: email });
 
-
     if (!admin) {
       return res.status(404).json({ message: "No User Found" });
     }
@@ -169,12 +186,10 @@ export const login = async (req, res) => {
 };
 
 export const addHostel = async (req, res, next) => {
-
-
   try {
-    const Admin = JSON.parse(req.headers.authorization)
+    const Admin = JSON.parse(req.headers.authorization);
     const { title, location, description, latitude, longitude } = req.body;
-    const { path, filename } = req.file
+    const { path, filename } = req.file;
 
     const hostelAdmin = await HostelAdmin.findOne({ _id: Admin.id });
 
@@ -193,7 +208,7 @@ export const addHostel = async (req, res, next) => {
         public_id: filename,
         url: path,
       },
-      adminData: Admin.id
+      adminData: Admin.id,
     });
 
     const savedHostelInfo = await newHostelInfo.save();
@@ -204,7 +219,7 @@ export const addHostel = async (req, res, next) => {
     });
     await hostelAdmin.save();
 
-    console.log(hostelAdmin,"=================");
+    console.log(hostelAdmin, "=================");
 
     res.status(200).json({ message: "success", hostelAdmin });
   } catch (err) {
@@ -212,3 +227,18 @@ export const addHostel = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
+
+export const hostelData = async (req, res, next) => {
+  try {
+    const hostelLists = await HostelInfo.find().select('hostelName hostelImage.url');
+    res.status(200).json(hostelLists);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
