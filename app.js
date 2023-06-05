@@ -53,6 +53,7 @@ import dotenv from 'dotenv';
 import logger from 'morgan';
 import superadminRouter from "./routes/superAdminRoutes.js";
 import HostelAdminRouter from './routes/hostelAdminRoutes.js'
+import LandingPageRouter from './routes/LandingRoutes.js'
 import errorHandler from './middlewares/errorHandler.js';
 import dbConnect from './config/dbConnection.js';
 
@@ -78,6 +79,7 @@ app.use(
 
 app.use("/api/hostelAdmin", HostelAdminRouter);
 app.use("/api/superAdmin", superadminRouter);
+app.use("/api",LandingPageRouter)
 
 app.listen(process.env.PORT_NO, (error) => {
   if (error) {

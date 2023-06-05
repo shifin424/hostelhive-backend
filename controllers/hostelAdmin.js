@@ -232,7 +232,7 @@ export const addHostel = async (req, res, next) => {
 
 export const hostelData = async (req, res, next) => {
   try {
-    const hostelLists = await HostelInfo.find().select('hostelName hostelImage.url');
+    const hostelLists = await HostelInfo.find().select('hostelName hostelImage.url isApproved');
     res.status(200).json(hostelLists);
   } catch (err) {
     console.log(err);
