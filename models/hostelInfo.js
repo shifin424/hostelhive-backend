@@ -17,6 +17,9 @@ const hostelInfoSchema = new mongoose.Schema(
       enum: ['Pending', 'Approved', 'Rejected'],
       default: 'Pending',
     },
+    RejectedReason:{
+      type:String,
+    },
     isBlocked: {
       type: Boolean,
       default: false,

@@ -229,16 +229,17 @@ export const addHostel = async (req, res, next) => {
 };
 
 
-
 export const hostelData = async (req, res, next) => {
   try {
-    const hostelLists = await HostelInfo.find().select('hostelName hostelImage.url isApproved');
+    const data = JSON.parse(req.headers.authorization);
+    const adminId = data.id;
+    const hostelLists = await HostelInfo.find({ adminData: adminId })
+      .select('hostelName hostelImage.url isApproved')
     res.status(200).json(hostelLists);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 
 
