@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import HostelInfo from "../models/hostelInfo.js";
+import HostelAdmin from '../models/hostelAdmin.js'
 
 dotenv.config();
 
@@ -90,26 +91,28 @@ export const approval = async (req, res, next) => {
 };
 
 
-export const rejected = async (req,res,next)=>{
-  try{
+export const rejected = async (req, res, next) => {
+  try {
+     const id = req.params.id;
+     const description = req.body.description;
 
-    const Id = req.params.id.trim();
-
-    const hostelData = await HostelInfo.findOne({ _id: Id });
+     const hostelData = await HostelInfo.findOne({ _id: id });
 
     if (hostelData.isApproved === 'Pending') {
       hostelData.isApproved = 'Rejected';
+      hostelData.rejectedReason = description; 
       await hostelData.save();
 
-      const success = "Hostel Rejected";
+      const success = 'Hostel Rejected';
       res.status(200).json({ message: success });
     } else {
-      const success = "Hostel is already Rejected";
+      const success = 'Hostel is already Rejected';
       res.status(200).json({ message: success });
     }
 
-  }catch(err){
+  } catch (err) {
     console.log(err);
-    next(err)
+    next(err);
   }
-}
+};
+
