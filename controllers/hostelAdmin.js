@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import HostelAdmin from "../models/hostelAdmin.js";
 import HostelInfo from "../models/hostelInfo.js";
+import HostelRooms from "../models/hostelroom.js";
 import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
 
 dotenv.config();
@@ -187,6 +188,7 @@ export const login = async (req, res) => {
 
 export const addHostel = async (req, res, next) => {
   try {
+    console.log("reached inside the controller");
     const Admin = JSON.parse(req.headers.authorization);
     const { title, location, description, latitude, longitude } = req.body;
     const { path, filename } = req.file;
@@ -236,6 +238,42 @@ export const hostelData = async (req, res, next) => {
     const hostelLists = await HostelInfo.find({ adminData: adminId })
       .select('hostelName hostelImage.url isApproved')
     res.status(200).json(hostelLists);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+export const roomData = async (req, res, next) => {
+  try {
+    const { roomNo, roomType, capacity, status, roomPrice, url, public_id } = req.body;
+    const hostelId = req.params.id;
+
+    const room = await HostelRooms.create({
+      room_no: roomNo,
+      room_type: roomType,
+      occupants: capacity,
+      status: status,
+      room_rent:roomPrice,
+      room_image: {
+        public_id: public_id,
+        url: url
+      },
+      blocking_rooms: false
+    });
+
+    const hostel = await HostelInfo.findById(hostelId);
+    console.log(hostel);
+
+    if (!hostel) {
+      return res.status(404).json({ message: 'Hostel not found' });
+    }
+    hostel.rooms.push(room._id);
+    await hostel.save();
+
+     res.status(200).json({ message: 'Room created successfully' });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: 'Internal server error' });

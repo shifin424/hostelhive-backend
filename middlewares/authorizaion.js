@@ -23,14 +23,17 @@ const verifyTokenSuperAdmin = (req, res, next) => {
 
 const verifyTokenHostelAdmin = (req, res, next) => {
    
-  const data =JSON.parse( req.headers.authorization);
+//   const data =JSON.parse( req.headers.authorization);
 
-  console.log(data,"=====");
+//   console.log(data,"=====");
     
-  const{token} = data
+//   const{token} = data
 
 
-//    const token = req.headers.authorization
+//   console.log(token,"hello");
+
+
+    const token = req.headers.authorization
 
     if (!token) {
         const error = new Error('No token provided');

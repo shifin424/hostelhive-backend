@@ -10,7 +10,7 @@ const hostelInfoSchema = new mongoose.Schema(
     lng: Number,
     rooms: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'rooms',
+      ref: 'HostelRooms',
     },
     isApproved: {
       type: String,
