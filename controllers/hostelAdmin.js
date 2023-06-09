@@ -251,6 +251,12 @@ export const roomData = async (req, res, next) => {
     const { roomNo, roomType, capacity, status, roomPrice, url, public_id } = req.body;
     const hostelId = req.params.id;
 
+    const existingRoom = await HostelRooms.findOne({ room_no: roomNo });
+
+    if (existingRoom) {
+      return res.status(400).json({ message: 'Room number already exists' });
+    }
+
     const room = await HostelRooms.create({
       room_no: roomNo,
       room_type: roomType,
@@ -276,6 +282,31 @@ export const roomData = async (req, res, next) => {
      res.status(200).json({ message: 'Room created successfully' });
   } catch (err) {
     console.log(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+export const fetchRoomData = async (req, res, next) => {
+  try {
+    const hostelId = req.params.id;
+
+    const hostel = await HostelInfo.findById(hostelId).populate('rooms');
+
+    if (!hostel) {
+      return res.status(404).json({ message: 'Hostel not found' });
+    }
+
+    const roomData = hostel.rooms.map(room => ({
+      roomNo: room.room_no,
+      roomType: room.room_type,
+      capacity: room.occupants,
+      status: room.status
+    }));
+
+    res.status(200).json(roomData);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

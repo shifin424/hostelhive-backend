@@ -8,18 +8,20 @@ const hostelInfoSchema = new mongoose.Schema(
     },
     lat: Number,
     lng: Number,
-    rooms: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'HostelRooms',
-    },
+    rooms: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'HostelRooms',
+      }
+    ],
     isApproved: {
       type: String,
       enum: ['Pending', 'Approved', 'Rejected'],
       default: 'Pending',
     },
-    rejectedReason:{
-      type:String,
-      default:"none"
+    rejectedReason: {
+      type: String,
+      default: "none"
     },
     isBlocked: {
       type: Boolean,
