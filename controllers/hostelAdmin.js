@@ -223,7 +223,7 @@ export const addHostel = async (req, res, next) => {
 
     console.log(hostelAdmin, "=================");
 
-    res.status(200).json({ message: "success", hostelAdmin });
+    res.status(200).json({ message: "success" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Internal Server Error" });
@@ -233,8 +233,9 @@ export const addHostel = async (req, res, next) => {
 
 export const hostelData = async (req, res, next) => {
   try {
-    const data = JSON.parse(req.headers.authorization);
-    const adminId = data.id;
+    const data = req.headers.authorization
+    console.log(req.user);
+    const adminId = req.user.id;
     const hostelLists = await HostelInfo.find({ adminData: adminId })
       .select('hostelName hostelImage.url isApproved')
     res.status(200).json(hostelLists);
@@ -248,7 +249,10 @@ export const hostelData = async (req, res, next) => {
 
 export const roomData = async (req, res, next) => {
   try {
-    const { roomNo, roomType, capacity, status, roomPrice, url, public_id } = req.body;
+
+    console.log("reached inside the room adding function");
+    const { roomNo, roomType, capacity, status, roomPrice,title,description} = req.body;
+    const { path, filename } = req.file;
     const hostelId = req.params.id;
 
     const existingRoom = await HostelRooms.findOne({ room_no: roomNo });
@@ -262,11 +266,13 @@ export const roomData = async (req, res, next) => {
       room_type: roomType,
       occupants: capacity,
       status: status,
-      room_rent:roomPrice,
+      room_rent: roomPrice,
       room_image: {
-        public_id: public_id,
-        url: url
+        public_id: filename,
+        url: path
       },
+      description:description,
+      title: title,
       blocking_rooms: false
     });
 
@@ -279,7 +285,7 @@ export const roomData = async (req, res, next) => {
     hostel.rooms.push(room._id);
     await hostel.save();
 
-     res.status(200).json({ message: 'Room created successfully' });
+    res.status(200).json({ message: 'Room created successfully' });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: 'Internal server error' });
@@ -301,7 +307,14 @@ export const fetchRoomData = async (req, res, next) => {
       roomNo: room.room_no,
       roomType: room.room_type,
       capacity: room.occupants,
-      status: room.status
+      status: room.status,
+      description: room.description,
+      title: room.title,
+      roomImage: {
+        publicId: room.room_image.public_id,
+        url: room.room_image.url
+      },
+      roomRent: room.room_rent,
     }));
 
     res.status(200).json(roomData);

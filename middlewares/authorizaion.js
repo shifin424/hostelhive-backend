@@ -5,7 +5,7 @@ dotenv.config();
 
 const verifyTokenSuperAdmin = (req, res, next) => {
     const token = req.headers.authorization;
-    console.log(token,"===");
+    console.log(token, "===");
 
     if (!token) {
         const error = new Error('No token provided');
@@ -22,34 +22,41 @@ const verifyTokenSuperAdmin = (req, res, next) => {
 };
 
 const verifyTokenHostelAdmin = (req, res, next) => {
-   
-  const data =JSON.parse( req.headers.authorization);
 
-  console.log(data,"=====");
-    
-  const{token} = data
+    //   const data =JSON.parse( req.headers.authorization);
 
+    //   console.log(data,"=====");
 
-//   console.log(token,"hello");
+    //   const{token} = data
 
 
-    //const token = req.headers.authorization
+    //   console.log(token,"hello");
+
+
+    const token = req.headers.authorization
+    console.log(token,"+++ Hello +++");
 
     if (!token) {
         const error = new Error('No token provided');
         error.statusCode = 401;
         return next(error);
-    } 
+    }
     try {
-        const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
-        if(decoded){
-        next();
-    }
-      
+        const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET, {
+            expiresIn: '3d',
+          });
+        if (decoded) {
+            {
+                req.user = decoded
+                console.log(req.user,"wooooooooooow");
+                next();
+            }
+        }
+
     } catch (error) {
-      next(error)
+        next(error)
     }
-  }; 
+};
 
 export default {
     verifyTokenSuperAdmin,

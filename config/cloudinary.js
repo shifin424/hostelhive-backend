@@ -22,8 +22,6 @@ const storage = new CloudinaryStorage({
 });
 
 
-
-
 const fileFilter = (req, file, cb) => {
   if (!["image/png", "image/jpg", "image/jpeg"].includes(file.mimetype)) {
     return cb(new Error("File is not an image"));
@@ -32,7 +30,6 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({ storage, fileFilter });
-
 const uploadImage = (req, res, next) => {
 
   upload.single('image')(req, res, (err) => {

@@ -35,6 +35,14 @@ const hostelRoomSchema = new mongoose.Schema(
         blocking_rooms: {
             type: Boolean,
             default: false
+        },
+        title:{
+            type:String,
+            required:true
+        },
+        description:{
+            type:String,
+            required:true
         }
 
     },
