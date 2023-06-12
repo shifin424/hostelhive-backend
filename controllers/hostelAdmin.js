@@ -251,7 +251,7 @@ export const roomData = async (req, res, next) => {
   try {
 
     console.log("reached inside the room adding function");
-    const { roomNo, roomType, capacity, status, roomPrice,title,description} = req.body;
+    const { roomNo, roomType, capacity, status, roomPrice, title, description } = req.body;
     const { path, filename } = req.file;
     const hostelId = req.params.id;
 
@@ -271,7 +271,7 @@ export const roomData = async (req, res, next) => {
         public_id: filename,
         url: path
       },
-      description:description,
+      description: description,
       title: title,
       blocking_rooms: false
     });
@@ -298,12 +298,12 @@ export const fetchRoomData = async (req, res, next) => {
     const hostelId = req.params.id;
 
     const hostel = await HostelInfo.findById(hostelId).populate('rooms');
-
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
 
     const roomData = hostel.rooms.map(room => ({
+      _id:room._id,
       roomNo: room.room_no,
       roomType: room.room_type,
       capacity: room.occupants,
@@ -318,6 +318,7 @@ export const fetchRoomData = async (req, res, next) => {
     }));
 
     res.status(200).json(roomData);
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal server error' });
