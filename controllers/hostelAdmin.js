@@ -13,7 +13,7 @@ export const signUp = async (req, res, next) => {
   try {
     const { fullName, email, mobileNumber, password, qualification, gender } =
       req.body;
-    console.log(fullName, "heyyyyyyyyy");
+   
 
     if (
       !fullName ||
@@ -89,7 +89,6 @@ export const otpVerification = async (req, res) => {
 
     const decoded = jwt.verify(token, process.env.OTP_JWT_SECRET);
 
-    console.log(decoded, "checked");
 
     if (!decoded.email || !decoded.mobileNumber) {
       res.status(401).json({
@@ -149,7 +148,7 @@ export const otpVerification = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  console.log(email, password);
+ 
 
   try {
     const admin = await HostelAdmin.findOne({ email: email });
@@ -188,12 +187,13 @@ export const login = async (req, res) => {
 
 export const addHostel = async (req, res, next) => {
   try {
-    console.log("reached inside the controller");
-    const Admin = JSON.parse(req.headers.authorization);
+    
+    const Admin = req.user.id
+  
     const { title, location, description, latitude, longitude } = req.body;
     const { path, filename } = req.file;
 
-    const hostelAdmin = await HostelAdmin.findOne({ _id: Admin.id });
+    const hostelAdmin = await HostelAdmin.findOne({ _id: Admin });
 
     const existingHostel = await HostelInfo.findOne({ hostelName: title });
     if (existingHostel) {
@@ -210,7 +210,7 @@ export const addHostel = async (req, res, next) => {
         public_id: filename,
         url: path,
       },
-      adminData: Admin.id,
+      adminData: Admin,
     });
 
     const savedHostelInfo = await newHostelInfo.save();
@@ -221,7 +221,7 @@ export const addHostel = async (req, res, next) => {
     });
     await hostelAdmin.save();
 
-    console.log(hostelAdmin, "=================");
+   
 
     res.status(200).json({ message: "success" });
   } catch (err) {
@@ -233,7 +233,7 @@ export const addHostel = async (req, res, next) => {
 
 export const hostelData = async (req, res, next) => {
   try {
-    const data = req.headers.authorization
+   
     console.log(req.user);
     const adminId = req.user.id;
     const hostelLists = await HostelInfo.find({ adminData: adminId })
@@ -250,7 +250,7 @@ export const hostelData = async (req, res, next) => {
 export const roomData = async (req, res, next) => {
   try {
 
-    console.log("reached inside the room adding function");
+  
     const { roomNo, roomType, capacity, status, roomPrice, title, description } = req.body;
     const { path, filename } = req.file;
     const hostelId = req.params.id;

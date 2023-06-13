@@ -7,7 +7,7 @@ const LandingPageRouter = express.Router();
 
 LandingPageRouter.get('/hostel-info',hostelData)
 
-LandingPageRouter.get('/hostel-over-view',singleHostelView)
+LandingPageRouter.get('/hostel-over-view/:id',singleHostelView)
 
 
 
