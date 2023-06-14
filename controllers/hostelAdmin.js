@@ -13,7 +13,6 @@ export const signUp = async (req, res, next) => {
   try {
     const { fullName, email, mobileNumber, password, qualification, gender } =
       req.body;
-   
 
     if (
       !fullName ||
@@ -57,16 +56,20 @@ export const signUp = async (req, res, next) => {
       }
     );
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const responseData = {
       fullName,
       email,
       mobileNumber,
-      password,
+      password: hashedPassword,
       qualification,
       gender,
       token,
     };
 
+    console.log(responseData, "data");
     return res.status(200).json(responseData);
   } catch (err) {
     console.log(err);
@@ -116,8 +119,8 @@ export const otpVerification = async (req, res) => {
           .json({ error: "User with this mobile number already exists" });
       }
 
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
+      // const salt = await bcrypt.genSalt(10);
+      //  const hashedPassword = await bcrypt.hash(password,salt);
 
       const hostelAdmin = await HostelAdmin.create({
         fullName,
@@ -125,7 +128,7 @@ export const otpVerification = async (req, res) => {
         mobile: mobileNumber,
         qualification,
         gender,
-        password: hashedPassword,
+        password,
       });
       if (hostelAdmin) {
         res.status(201).json({
@@ -148,7 +151,6 @@ export const otpVerification = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
- 
 
   try {
     const admin = await HostelAdmin.findOne({ email: email });
@@ -156,8 +158,10 @@ export const login = async (req, res) => {
     if (!admin) {
       return res.status(404).json({ message: "No User Found" });
     }
-    const isMatch = await bcrypt.compare(password, admin.password);
-
+    console.log(admin.password);
+    console.log(password+"");
+    const isMatch = await bcrypt.compare(password,admin.password);
+console.log(isMatch);
     if (isMatch) {
       const payload = {
         id: admin.id,
@@ -187,9 +191,9 @@ export const login = async (req, res) => {
 
 export const addHostel = async (req, res, next) => {
   try {
-    
+
     const Admin = req.user.id
-  
+
     const { title, location, description, latitude, longitude } = req.body;
     const { path, filename } = req.file;
 
@@ -221,7 +225,7 @@ export const addHostel = async (req, res, next) => {
     });
     await hostelAdmin.save();
 
-   
+
 
     res.status(200).json({ message: "success" });
   } catch (err) {
@@ -233,7 +237,7 @@ export const addHostel = async (req, res, next) => {
 
 export const hostelData = async (req, res, next) => {
   try {
-   
+
     console.log(req.user);
     const adminId = req.user.id;
     const hostelLists = await HostelInfo.find({ adminData: adminId })
@@ -250,7 +254,7 @@ export const hostelData = async (req, res, next) => {
 export const roomData = async (req, res, next) => {
   try {
 
-  
+
     const { roomNo, roomType, capacity, status, roomPrice, title, description } = req.body;
     const { path, filename } = req.file;
     const hostelId = req.params.id;
@@ -303,7 +307,7 @@ export const fetchRoomData = async (req, res, next) => {
     }
 
     const roomData = hostel.rooms.map(room => ({
-      _id:room._id,
+      _id: room._id,
       roomNo: room.room_no,
       roomType: room.room_type,
       capacity: room.occupants,
@@ -318,7 +322,7 @@ export const fetchRoomData = async (req, res, next) => {
     }));
 
     res.status(200).json(roomData);
-    
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal server error' });
