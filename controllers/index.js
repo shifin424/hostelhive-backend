@@ -3,15 +3,15 @@ import HostelAdmin from "../models/hostelAdmin.js";
 import HostelInfo from "../models/hostelInfo.js";
 
 
-export const hostelData = async (req,res,next)=>{
-    try{
+export const hostelData = async (req, res, next) => {
+  try {
 
-        const hostelListing = await HostelInfo.find({isApproved:"Approved"}).select('hostelImage.url hostelName')
-        res.status(200).json(hostelListing)
+    const hostelListing = await HostelInfo.find({ isApproved: "Approved" }).select('hostelImage.url hostelName')
+    res.status(200).json(hostelListing)
 
-    }catch(err){
-        console.log(err);
-    }
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 export const singleHostelView = async (req, res, next) => {
@@ -60,10 +60,43 @@ export const singleHostelView = async (req, res, next) => {
 };
 
 
+export const fetchRoomData = async (req, res, next) => {
+  try {
+    const hostelId = req.params.id;
+    const { room_type } = req.body;
+
+    const hostel = await HostelInfo.findById(hostelId).populate({
+      path: 'rooms',
+      match: { room_type },
+      select: 'room_image.url room_rent title description occupants capacity',
+    });
+
+    if (!hostel) {
+      return res.status(404).json({ message: 'Hostel not found' });
+    }
+
+    const roomData = hostel.rooms.map(room => ({
+      url: room.room_image.url,
+      rent: room.room_rent,
+      title: room.title,
+      description: room.description,
+      occupants: room.occupants,
+      capacity:room.capacity
+    }));
+
+    res.json({ roomData: roomData });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Failed to fetch room data' });
+  }
+};
 
 
 
 
 
 
-  
+
+
+

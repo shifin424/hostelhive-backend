@@ -268,7 +268,7 @@ export const roomData = async (req, res, next) => {
     const room = await HostelRooms.create({
       room_no: roomNo,
       room_type: roomType,
-      occupants: capacity,
+      capacity: capacity,
       status: status,
       room_rent: roomPrice,
       room_image: {
@@ -310,7 +310,7 @@ export const fetchRoomData = async (req, res, next) => {
       _id: room._id,
       roomNo: room.room_no,
       roomType: room.room_type,
-      capacity: room.occupants,
+      capacity: room.capacity,
       status: room.status,
       description: room.description,
       title: room.title,

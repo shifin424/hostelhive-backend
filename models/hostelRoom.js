@@ -10,9 +10,13 @@ const hostelRoomSchema = new mongoose.Schema(
             type: String,
             required: true
         },
+        capacity:{
+            type:Number,
+            required:true
+        },
         occupants: {
             type: Number,
-            required: true
+            default:0
         },
         status: {
             type: String,
