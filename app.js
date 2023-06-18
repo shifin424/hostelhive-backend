@@ -77,8 +77,8 @@ app.use(
   })
 );
 
-app.use("/api/hostelAdmin", HostelAdminRouter);
-app.use("/api/superAdmin", superadminRouter);
+app.use("/api/hostel", HostelAdminRouter);
+app.use("/api/admin", superadminRouter);
 app.use("/api",LandingPageRouter)
 
 app.listen(process.env.PORT_NO, (error) => {

@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import HostelAdmin from "../models/hostelAdmin.js";
 import HostelInfo from "../models/hostelInfo.js";
+import bcrypt from "bcrypt";
+
 
 
 export const hostelData = async (req, res, next) => {
@@ -27,7 +29,7 @@ export const singleHostelView = async (req, res, next) => {
         path: "adminData",
         select: "fullName mobile email",
       })
-      .select("hostelName hostelImage description location adminData");
+      .select("hostelName hostelImage description location adminData hostelType admissionFees");
 
     const rooms = {};
 
@@ -51,7 +53,7 @@ export const singleHostelView = async (req, res, next) => {
       })),
     };
 
-    console.log(data);
+    console.log(data,"backend data");
     res.json(data);
   } catch (err) {
     console.log(err);
@@ -92,8 +94,35 @@ export const fetchRoomData = async (req, res, next) => {
   }
 };
 
+export const singup = async (req,res,next)=>{
+  try{
+    const {fullName,password,confirmPassword,phone,gender,email} = req.body
 
+     const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password,salt);
 
+    const AuthData = {
+      fullName,
+      password:hashedPassword,
+      phone,
+      gender,
+      email
+    }
+
+    res.status(200).json({response:AuthData})
+  }catch(err){
+    console.log(err);
+  }
+}
+
+export const OtpVerification = async(req,res,next)=>{
+  try{
+   console.log("otpData",req.body)
+   res.status(200).json({message:"success"})
+  }catch(err){
+    console.log(err);
+  }
+}
 
 
 

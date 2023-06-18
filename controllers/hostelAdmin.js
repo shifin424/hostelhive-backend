@@ -6,6 +6,7 @@ import HostelAdmin from "../models/hostelAdmin.js";
 import HostelInfo from "../models/hostelInfo.js";
 import HostelRooms from "../models/hostelroom.js";
 import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
+import Joi from "joi";
 
 dotenv.config();
 
@@ -119,8 +120,7 @@ export const otpVerification = async (req, res) => {
           .json({ error: "User with this mobile number already exists" });
       }
 
-      // const salt = await bcrypt.genSalt(10);
-      //  const hashedPassword = await bcrypt.hash(password,salt);
+      
 
       const hostelAdmin = await HostelAdmin.create({
         fullName,
@@ -159,9 +159,9 @@ export const login = async (req, res) => {
       return res.status(404).json({ message: "No User Found" });
     }
     console.log(admin.password);
-    console.log(password+"");
-    const isMatch = await bcrypt.compare(password,admin.password);
-console.log(isMatch);
+    console.log(password + "");
+    const isMatch = await bcrypt.compare(password, admin.password);
+    console.log(isMatch);
     if (isMatch) {
       const payload = {
         id: admin.id,
@@ -191,17 +191,63 @@ console.log(isMatch);
 
 export const addHostel = async (req, res, next) => {
   try {
-
-    const Admin = req.user.id
-
-    const { title, location, description, latitude, longitude } = req.body;
+    const Admin = req.user.id;
+    const { title, location, description, hostelType, admissionFees, latitude, longitude } = req.body;
     const { path, filename } = req.file;
 
-    const hostelAdmin = await HostelAdmin.findOne({ _id: Admin });
+    console.log(req.body);
+    console.log(req.file)
 
+    const schema = Joi.object({
+      title: Joi.string().required().messages({
+        'any.required': 'Hostel Name is required',
+      }),
+      location: Joi.string().required().messages({
+        'any.required': 'Location is required',
+      }),
+      description: Joi.string()
+        .required()
+        .min(320)
+        .max(550)
+        .messages({
+          'any.required': 'Description is required',
+          'string.min': 'Description must have at least 50 words',
+          'string.max': 'Description must have at most 90 words',
+        }),
+      path: Joi.string().required().messages({
+        'any.required': 'Image path is required',
+      }),
+      filename: Joi.string().required().messages({
+        'any.required': 'Image filename is required',
+      }),
+      hostelType: Joi.string().required().messages({
+        'any.required': 'Hostel Type is required',
+      }),
+      admissionFees: Joi.number().required().messages({
+        'any.required': 'Admission Fees is required',
+      }),
+    });
+
+    const { error } = schema.validate(
+      { title, location, description, hostelType, admissionFees, path, filename },
+      { abortEarly: true }
+    );
+
+    if (error) {
+      console.log(error, "spotted");
+      const errors = error.details.map((detail) => ({
+        field: detail.path[0],
+        message: detail.message,
+      }));
+      return res.status(400).json({ errors });
+    }
+
+
+    const hostelAdmin = await HostelAdmin.findOne({ _id: Admin });
+    
     const existingHostel = await HostelInfo.findOne({ hostelName: title });
     if (existingHostel) {
-      return res.status(400).json({ message: "Hostel name already exists" });
+      return res.status(400).json({ message: 'Hostel name already exists' });
     }
 
     const newHostelInfo = await HostelInfo({
@@ -210,6 +256,8 @@ export const addHostel = async (req, res, next) => {
       lng: longitude,
       description: description,
       location: location,
+      hostelType: hostelType,
+      admissionFees: admissionFees,
       hostelImage: {
         public_id: filename,
         url: path,
@@ -225,12 +273,10 @@ export const addHostel = async (req, res, next) => {
     });
     await hostelAdmin.save();
 
-
-
-    res.status(200).json({ message: "success" });
+    res.status(200).json({ message: 'success' });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
