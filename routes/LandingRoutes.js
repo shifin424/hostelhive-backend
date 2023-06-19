@@ -1,5 +1,5 @@
 import express from "express";
-import {hostelData,singleHostelView ,fetchRoomData,singup,OtpVerification} from '../controllers/index.js';
+import {hostelData,singleHostelView ,fetchRoomData,signup,OtpVerification,login} from '../controllers/index.js';
 
 
 const LandingPageRouter = express.Router(); 
@@ -11,10 +11,11 @@ LandingPageRouter.get('/hostel-over-view/:id',singleHostelView)
 
 LandingPageRouter.post('/hostel-room-data/:id',fetchRoomData)
 
-LandingPageRouter.post('/signup',singup)
+LandingPageRouter.post('/signup',signup)
 
 LandingPageRouter.post('/otp',OtpVerification)
 
+LandingPageRouter.post('/login',login)
 
 
 

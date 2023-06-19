@@ -207,8 +207,8 @@ export const addHostel = async (req, res, next) => {
       }),
       description: Joi.string()
         .required()
-        .min(320)
-        .max(550)
+        .min(520)
+        .max(650)
         .messages({
           'any.required': 'Description is required',
           'string.min': 'Description must have at least 50 words',
@@ -242,8 +242,11 @@ export const addHostel = async (req, res, next) => {
       return res.status(400).json({ errors });
     }
 
+    
 
     const hostelAdmin = await HostelAdmin.findOne({ _id: Admin });
+
+    console.log(hostelAdmin,1);
     
     const existingHostel = await HostelInfo.findOne({ hostelName: title });
     if (existingHostel) {
