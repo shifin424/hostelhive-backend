@@ -73,6 +73,12 @@ export const fetchRoomData = async (req, res, next) => {
   try {
     const hostelId = req.params.id;
     const { room_type } = req.body;
+    const StudentId = req.params.user 
+
+    const StudentData = await Student.findById(StudentId).select('isVerified isRequested')
+
+    console.log(StudentData);
+    
 
     const hostel = await HostelInfo.findById(hostelId).populate({
       path: 'rooms',
@@ -93,7 +99,8 @@ export const fetchRoomData = async (req, res, next) => {
       capacity: room.capacity
     }));
 
-    res.json({ roomData: roomData });
+    res.json({ roomData, StudentData });
+
 
   } catch (err) {
     console.log(err);
@@ -273,9 +280,8 @@ export const login = async (req,res,next) =>{
 
       res.json({
         success: true,
-        id: Student.id,
-        name: Student.fullName,
-        email: Student.email,
+        id: student.id,
+        name: student.fullName,
         token: `Bearer ${token}`,
       });
 
