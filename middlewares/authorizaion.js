@@ -53,8 +53,10 @@ const verifyTokenHostelAdmin = (req, res, next) => {
 };
 
 const verifyTokenStudent = (req, res, next) => {
+    console.log(req.headers.authorization,11);
     const token = req.headers.authorization;
 
+    console.log(token);
     if (!token) {
         const error = new Error('No token provided');
         error.statusCode = 401;

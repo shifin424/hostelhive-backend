@@ -91,6 +91,7 @@ export const fetchRoomData = async (req, res, next) => {
     }
 
     const roomData = hostel.rooms.map(room => ({
+      _id:room._id,
       url: room.room_image.url,
       rent: room.room_rent,
       title: room.title,
@@ -294,6 +295,14 @@ export const login = async (req,res,next) =>{
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
+
+// export const request = async (req,res,next) =>{
+//   try{
+    
+//   }catch{
+//     console.log(err);
+//   }
+// }
 
 
 

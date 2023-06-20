@@ -195,53 +195,7 @@ export const addHostel = async (req, res, next) => {
     const { title, location, description, hostelType, admissionFees, latitude, longitude } = req.body;
     const { path, filename } = req.file;
 
-    console.log(req.body);
-    console.log(req.file)
-
-    const schema = Joi.object({
-      title: Joi.string().required().messages({
-        'any.required': 'Hostel Name is required',
-      }),
-      location: Joi.string().required().messages({
-        'any.required': 'Location is required',
-      }),
-      description: Joi.string()
-        .required()
-        .min(520)
-        .max(650)
-        .messages({
-          'any.required': 'Description is required',
-          'string.min': 'Description must have at least 50 words',
-          'string.max': 'Description must have at most 90 words',
-        }),
-      path: Joi.string().required().messages({
-        'any.required': 'Image path is required',
-      }),
-      filename: Joi.string().required().messages({
-        'any.required': 'Image filename is required',
-      }),
-      hostelType: Joi.string().required().messages({
-        'any.required': 'Hostel Type is required',
-      }),
-      admissionFees: Joi.number().required().messages({
-        'any.required': 'Admission Fees is required',
-      }),
-    });
-
-    const { error } = schema.validate(
-      { title, location, description, hostelType, admissionFees, path, filename },
-      { abortEarly: true }
-    );
-
-    if (error) {
-      console.log(error, "spotted");
-      const errors = error.details.map((detail) => ({
-        field: detail.path[0],
-        message: detail.message,
-      }));
-      return res.status(400).json({ errors });
-    }
-
+   
     
 
     const hostelAdmin = await HostelAdmin.findOne({ _id: Admin });
