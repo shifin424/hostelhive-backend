@@ -478,10 +478,32 @@ export const fetchRoomData = async (req, res, next) => {
 
 export const studentRequestData = async (req, res, next) => {
   try {
-    const StudentRequest = await Student.find({ isRequested: true, isVerified: false })
-
-    res.status(200).json({ message: "Success" })
+    const hostelId = req?.params?.id
+    const StudentRequestData = await Student.find({hostelId ,isRequested: true, isVerified: false}).select(" address _id fullName email gender phone ")
+   
+    res.status(200).json({ StudentRequestData})
   } catch (err) {
     res.status(500).json({ error: "Internal Server Error" })
+  }
+}
+
+export const approval = async (req,res,next)=>{
+  try{
+    const id = req.params.id
+
+    const studentData = await Student.findOne({_id :id })
+    console.log(studentData);
+    if (studentData.isVerified === false) {
+      studentData.isVerified = true;
+      await studentData.save();
+
+      const success = "Approved Student request Successfully";
+      res.status(200).json({ message: success });
+    } else {
+      const success = "Already Student Reuest is  approved";
+      res.status(200).json({ message: success });
+    }
+  }catch(err){
+    res.status(500).json({error:'Internal server error'})
   }
 }

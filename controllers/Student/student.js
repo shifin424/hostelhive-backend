@@ -23,6 +23,7 @@ export const request = async (req, res, next) => {
       const studentGender = student.gender
       const hostelType = hostel.hostelType
   
+    
       if (hostelType !== 'all') {
         if (
           (studentGender === 'female' && hostelType === 'boys') ||

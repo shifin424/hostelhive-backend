@@ -1,5 +1,5 @@
 import express from "express";
-import { signUp ,otpVerification,login,addHostel,hostelData,roomData,fetchRoomData, studentRequestData} from '../controllers/hostelAdmin.js';
+import { signUp ,otpVerification,login,addHostel,hostelData,roomData,fetchRoomData, studentRequestData,approval} from '../controllers/hostelAdmin.js';
 import uploadImage from '../config/cloudinary.js'
 import veryfyToken from '../middlewares/authorizaion.js'
 
@@ -24,7 +24,9 @@ hosteladminRouter.post('/add-rooms/:id',veryfyToken.verifyTokenHostelAdmin,uploa
 
 hosteladminRouter.get('/room-data/:id',veryfyToken.verifyTokenHostelAdmin,fetchRoomData)
 
-hosteladminRouter.get('/fetchRequestData',veryfyToken.verifyTokenHostelAdmin,studentRequestData)
+hosteladminRouter.get('/fetchRequestData/:id',veryfyToken.verifyTokenHostelAdmin,studentRequestData)
+
+hosteladminRouter.patch('/student-approval/:id',veryfyToken.verifyTokenHostelAdmin,approval)
 
 
 
