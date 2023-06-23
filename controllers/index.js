@@ -73,11 +73,14 @@ export const fetchRoomData = async (req, res, next) => {
   try {
     const hostelId = req.params.id;
     const { room_type } = req.body;
-    const StudentId = req.params.user 
 
-    const StudentData = await Student.findById(StudentId).select('isVerified isRequested')
+    console.log(hostelId,room_type);
 
-    console.log(StudentData);
+    //const StudentId = req.params.user 
+
+    // const StudentData = await Student.findById(StudentId).select('isVerified isRequested')
+
+    // console.log(StudentData);
     
 
     const hostel = await HostelInfo.findById(hostelId).populate({
@@ -86,11 +89,12 @@ export const fetchRoomData = async (req, res, next) => {
       select: 'room_image.url room_rent title description occupants capacity',
     });
 
+
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
 
-    const roomData = hostel.rooms.map(room => ({
+    const roomData = hostel?.rooms?.map(room => ({
       _id:room._id,
       url: room.room_image.url,
       rent: room.room_rent,
@@ -99,9 +103,8 @@ export const fetchRoomData = async (req, res, next) => {
       occupants: room.occupants,
       capacity: room.capacity
     }));
-
-    res.json({ roomData, StudentData });
-
+   console.log(roomData,"roomData");
+    res.json({ roomData });
 
   } catch (err) {
     console.log(err);
@@ -190,7 +193,7 @@ export const signup = async (req, res, next) => {
       gender,
       email,
     };
-
+console.log(AuthData,"Backend data");
     res.status(200).json({ response: AuthData });
   } catch (err) {
     console.log(err);
@@ -275,7 +278,7 @@ export const login = async (req,res,next) =>{
         fullName: student.fullName,
       };
 
-      const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+      const token = jwt.sign(payload, process.env.USER_SECRET_KEY, {
         expiresIn: "3d",
       });
 

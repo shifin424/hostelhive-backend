@@ -9,7 +9,7 @@ LandingPageRouter.get('/hostel-info',hostelData)
 
 LandingPageRouter.get('/hostel-over-view/:id',singleHostelView)
 
-LandingPageRouter.post('/hostel-room-data/:id/:user',fetchRoomData)
+LandingPageRouter.post('/hostel-room-data/:id',fetchRoomData)
 
 LandingPageRouter.post('/signup',signup)
 

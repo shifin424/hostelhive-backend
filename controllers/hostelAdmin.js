@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import HostelAdmin from "../models/hostelAdmin.js";
 import HostelInfo from "../models/hostelInfo.js";
 import HostelRooms from "../models/hostelroom.js";
+import Student from '../models/studentAuth.js'
 import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
 import Joi from "joi";
 
@@ -474,3 +475,13 @@ export const fetchRoomData = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const studentRequestData = async (req, res, next) => {
+  try {
+    const StudentRequest = await Student.find({ isRequested: true, isVerified: false })
+
+    res.status(200).json({ message: "Success" })
+  } catch (err) {
+    res.status(500).json({ error: "Internal Server Error" })
+  }
+}

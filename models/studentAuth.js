@@ -93,7 +93,7 @@ const studentSchema = new mongoose.Schema(
             ref: 'HostelRooms',
         },
 
-        hostelInfo: {
+        hostelId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'HostelInfo',
         },
@@ -119,6 +119,10 @@ const studentSchema = new mongoose.Schema(
             type: String,
             default: "none"
         },
+        isProfile:{
+            type:String,
+            default:'notCompleted'
+        }
     },
     { timestamps: true }
 );

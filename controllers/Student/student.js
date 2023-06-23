@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Students from '../../models/studentAuth.js'
 import Joi from "joi";
 import HostelInfo from "../../models/hostelInfo.js";
+import Student from "../../models/studentAuth.js";
 
 
 
@@ -10,6 +11,8 @@ export const request = async (req, res, next) => {
       const roomId = req.params.id;
       const userId = req.user.id;
       const userData = req.body;
+      const id = req.params.hostelId
+      console.log(id);
   
       const hostel = await HostelInfo.findOne({ rooms: roomId });
       if (!hostel) {
@@ -44,13 +47,24 @@ export const request = async (req, res, next) => {
           'address.pincode': userData.pincode,
           'address.country': userData.country,
           isRequested: true,
+          hostelId :id
         },
       });
-  
-      res.status(200).json({ isRequested: true });
+      res.status(200).json({message:"success"})
     } catch (err) {
       console.log(err);
       res.status(500).send('Internal Server Error');
     }
   };
 
+
+  export const BookingData = async (req,res,next) =>{
+    try{
+      const studentId = req.user.id
+      const bookingStatus = await Student.find({_id:studentId}).select('isRequested isVerified')
+      
+     res.status(200).json({bookingStatus})
+    }catch(err){
+      res.status(400).json({error:"Internal Server Error"})
+    }
+  }

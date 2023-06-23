@@ -56,7 +56,6 @@ export const requests = async (req, res, next) => {
         select: "fullName mobile email",
       })
       .select("hostelName hostelImage location description adminData");
-      console.log(result);
     res.json(result);
   } catch (err) {
     console.log(err);
