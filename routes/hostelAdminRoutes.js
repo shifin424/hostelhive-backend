@@ -1,5 +1,5 @@
 import express from "express";
-import { signUp ,otpVerification,login,addHostel,hostelData,roomData,fetchRoomData, studentRequestData,approval} from '../controllers/hostelAdmin.js';
+import { signUp ,otpVerification,login,addHostel,hostelData,roomData,fetchRoomData, studentRequestData,approval, rejected} from '../controllers/hostelAdmin.js';
 import uploadImage from '../config/cloudinary.js'
 import veryfyToken from '../middlewares/authorizaion.js'
 
@@ -27,6 +27,8 @@ hosteladminRouter.get('/room-data/:id',veryfyToken.verifyTokenHostelAdmin,fetchR
 hosteladminRouter.get('/fetchRequestData/:id',veryfyToken.verifyTokenHostelAdmin,studentRequestData)
 
 hosteladminRouter.patch('/student-approval/:id',veryfyToken.verifyTokenHostelAdmin,approval)
+
+hosteladminRouter.patch('/student-rejection/:id',veryfyToken.verifyTokenHostelAdmin,rejected)
 
 
 

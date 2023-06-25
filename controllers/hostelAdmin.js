@@ -479,7 +479,10 @@ export const fetchRoomData = async (req, res, next) => {
 export const studentRequestData = async (req, res, next) => {
   try {
     const hostelId = req?.params?.id
-    const StudentRequestData = await Student.find({hostelId ,isRequested: true, isVerified: false}).select(" address _id fullName email gender phone ")
+    const StudentRequestData = await Student.find({hostelId ,isRequested: true, isVerified: false, rejectedReason:'none'})
+    .select(" address _id fullName email gender phone ")
+    .populate('hostelId',"hostelName")
+    console.log(StudentRequestData,"backend data");
    
     res.status(200).json({ StudentRequestData})
   } catch (err) {
@@ -492,7 +495,6 @@ export const approval = async (req,res,next)=>{
     const id = req.params.id
 
     const studentData = await Student.findOne({_id :id })
-    console.log(studentData);
     if (studentData.isVerified === false) {
       studentData.isVerified = true;
       await studentData.save();
@@ -507,3 +509,28 @@ export const approval = async (req,res,next)=>{
     res.status(500).json({error:'Internal server error'})
   }
 }
+
+
+export const rejected = async (req, res, next) => {
+  try {
+     const id = req.params.id;
+     const description = req.body.description;
+
+     const studentData = await Student.findOne({ _id: id });
+
+    if (studentData.isVerified === false) {
+      studentData.rejectedReason = description; 
+      await studentData.save();
+
+      const success = 'Student Request has been Rejected';
+      res.status(200).json({ message: success });
+    } else {
+      const success = 'student request is already is Rejected';
+      res.status(200).json({ message: success });
+    }
+
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};

@@ -287,6 +287,7 @@ export const login = async (req,res,next) =>{
         id: student.id,
         name: student.fullName,
         token: `Bearer ${token}`,
+        role :student.role
       });
 
     }else {
