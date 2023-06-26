@@ -53,6 +53,7 @@ const verifyTokenHostelAdmin = (req, res, next) => {
 };
 
 const verifyTokenStudent = (req, res, next) => {
+    
     const token = req.headers.authorization;
     console.log(token,"StudentToken");
     if (!token) {

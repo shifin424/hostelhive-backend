@@ -9,10 +9,6 @@ const paymentSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        rentAmount: {
-            type: Number,
-            required: true
-        },
         dateOfPayment: {
             type: Date,
             default: Date.now,

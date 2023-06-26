@@ -24,6 +24,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^2.0.22",
     "promisify": "^0.0.3",
+    "razorpay": "^2.8.6",
     "twilio": "^4.11.1",
     "yup": "^1.2.0"
   }

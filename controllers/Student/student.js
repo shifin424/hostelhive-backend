@@ -2,8 +2,11 @@ import mongoose from "mongoose";
 import Students from '../../models/studentAuth.js'
 import Joi from "joi";
 import HostelInfo from "../../models/hostelInfo.js";
-import HostelRooms from '../../models/hostelroom.js'
-
+import HostelRooms from '../../models/hostelroom.js';
+import Payment from "../../models/payement.js";
+import dotenv from 'dotenv'
+import Razorpay from 'razorpay'
+dotenv.config()
 
 
 export const request = async (req, res, next) => {
@@ -76,7 +79,7 @@ export const fetchPaymentData = async (req, res, next) => {
     
     const roomDetails = await HostelRooms.findById(roomId)
     const hostelDetails = await HostelInfo.findOne({ 'rooms': roomId }).populate('rooms')
-    console.log(hostelDetails);
+
     
     const now = new Date();
     const daysInMonth  = new Date(
@@ -98,3 +101,43 @@ export const fetchPaymentData = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" })
   }
 }
+
+export const payMentDatas = async (req,res,next)=>{
+  try{
+      const {order_id,amount ,currency,payment_capture} = req.body;
+      console.log(order_id,amount,currency,payment_capture);
+
+console.log("data",req.body);
+              const razorpayInstance = new Razorpay({
+        key_id: process.env.KEY_ID,
+        key_secret: process.env.KEY_SECRETS,
+      });
+      console.log(process.env.KEY_ID,process.env.KEY_SECRETS,"<<<<<<<<<<");
+
+      const option ={
+       receipt: order_id,
+        amount: amount * 100,
+        currency: "INR",
+        payment_capture:payment_capture
+      }
+      const order = await razorpayInstance.orders.create(option);
+      if(!order) return res.status(500).send("somthing error")
+  
+      res.status(200).json({ success: true, data:order });
+
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+export const paymentVerification = async (req,res,next) => {
+  try{
+
+    console.log(req.body,'in payment controllelr');
+  }catch(err){
+    res.status(500).json({message : "Success"})
+  }
+}
+
