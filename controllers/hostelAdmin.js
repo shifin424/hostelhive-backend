@@ -86,6 +86,7 @@ export const signUp = async (req, res, next) => {
       return res.status(400).json({ errors });
     }
 
+    console.log("Reaches here",1)
     const adminExistByName = await HostelAdmin.findOne({ fullName });
     if (adminExistByName) {
       return res
@@ -93,6 +94,7 @@ export const signUp = async (req, res, next) => {
         .json({ message: "User with this name already exists" });
     }
 
+    console.log("Reaches here ,2")
     const adminExistsByEmail = await HostelAdmin.findOne({ email });
     if (adminExistsByEmail) {
       console.log("backend");
@@ -110,10 +112,11 @@ export const signUp = async (req, res, next) => {
         .json({ message: "User with this mobile number already exists" });
     }
 
-    const otpSend = await sendOtp(mobileNumber);
-    if (!otpSend) {
-      return res.status(500).json({ error: "Failed to send OTP" });
-    }
+    console.log("Reaches here  otp");
+    // const otpSend = await sendOtp(mobileNumber);
+    // if (!otpSend) {
+    //   return res.status(500).json({ error: "Failed to send OTP" });
+    // }
 
     const token = jwt.sign(
       { email, mobileNumber },
@@ -135,7 +138,7 @@ export const signUp = async (req, res, next) => {
       gender,
       token,
     };
-
+console.log(responseData,"backend data");
     return res.status(200).json(responseData);
   } catch (err) {
     console.log(err);
@@ -165,8 +168,9 @@ export const otpVerification = async (req, res) => {
       });
     }
 
-    const otpVerify = await verifyOtp(mobileNumber, otpCode);
-    if (otpVerify.status == "approved") {
+    //const otpVerify = await verifyOtp(mobileNumber, otpCode);
+    // if (otpVerify.status == "approved") {
+      if(otpCode){
       const adminExistsByEmail = await HostelAdmin.findOne({ email });
       if (adminExistsByEmail) {
         return res
@@ -408,7 +412,15 @@ export const roomData = async (req, res, next) => {
     const { path, filename } = req.file;
     const hostelId = req.params.id;
 
-    const existingRoom = await HostelRooms.findOne({ room_no: roomNo });
+    const hostel = await HostelInfo.findById(hostelId);
+    if (!hostel) {
+      return res.status(404).json({ message: "Hostel not found" });
+    }
+
+    const existingRoom = await HostelRooms.findOne({
+      room_no: roomNo,
+      _id: { $in: hostel.rooms }, // Check if the room exists within the hostel's rooms
+    });
 
     if (existingRoom) {
       return res.status(400).json({ message: "Room number already exists" });
@@ -429,12 +441,6 @@ export const roomData = async (req, res, next) => {
       blocking_rooms: false,
     });
 
-    const hostel = await HostelInfo.findById(hostelId);
-    console.log(hostel);
-
-    if (!hostel) {
-      return res.status(404).json({ message: "Hostel not found" });
-    }
     hostel.rooms.push(room._id);
     await hostel.save();
 
@@ -444,6 +450,7 @@ export const roomData = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 export const fetchRoomData = async (req, res, next) => {
   try {

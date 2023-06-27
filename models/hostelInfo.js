@@ -7,12 +7,12 @@ const hostelInfoSchema = new mongoose.Schema(
       required: true,
     },
     lat: {
-      type:Number,
-      required:true
+      type: Number,
+      required: true
     },
     lng: {
-      type:Number,
-      required:true
+      type: Number,
+      required: true
     },
     rooms: [
       {
@@ -37,27 +37,27 @@ const hostelInfoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    hostelType:{
-      type:String,
-      required:true
+    hostelType: {
+      type: String,
+      required: true
     },
-    admissionFees:{
-      type:Number,
-      required:true
+    admissionFees: {
+      type: Number,
+      required: true
     },
     hostelImage: {
       public_id: {
         type: String,
-        required:true
+        required: true
       },
       url: {
         type: String,
-        required:true
+        required: true
       },
     },
     location: {
       type: String,
-      required:true
+      required: true
     },
     hostelReviews: {
       type: mongoose.Schema.Types.ObjectId,
@@ -66,8 +66,8 @@ const hostelInfoSchema = new mongoose.Schema(
     adminData: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'HostelAdmin',
-      required:true
-    },
+      required: true
+    }
   },
   { timestamps: true }
 );

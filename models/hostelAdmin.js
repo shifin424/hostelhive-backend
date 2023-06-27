@@ -45,6 +45,15 @@ const hosteladminSchema = new mongoose.Schema(
         type:String
       }
     },
+    walletTotal: {
+      type: Number,
+      default: 0
+    },
+    walletDetails: [
+      {
+        type: String
+      }
+    ],
     status: {
       type: String,
       default: "Guest",

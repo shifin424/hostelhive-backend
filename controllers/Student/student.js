@@ -4,7 +4,9 @@ import Joi from "joi";
 import HostelInfo from "../../models/hostelInfo.js";
 import HostelRooms from '../../models/hostelroom.js';
 import Payment from "../../models/payement.js";
+import Student from "../../models/studentAuth.js";
 import dotenv from 'dotenv'
+import jwt from "jsonwebtoken";
 import Razorpay from 'razorpay'
 dotenv.config()
 
@@ -76,16 +78,16 @@ export const BookingData = async (req, res, next) => {
 export const fetchPaymentData = async (req, res, next) => {
   try {
     const roomId = req.params.id
-    
+
     const roomDetails = await HostelRooms.findById(roomId)
     const hostelDetails = await HostelInfo.findOne({ 'rooms': roomId }).populate('rooms')
 
-    
+
     const now = new Date();
-    const daysInMonth  = new Date(
+    const daysInMonth = new Date(
       now.getFullYear(),
       now.getMonth() + 1,
-      0 
+      0
     ).getDate();
 
     const monthlyRent = roomDetails.room_rent
@@ -95,49 +97,120 @@ export const fetchPaymentData = async (req, res, next) => {
     const dynamicRent = Math.round(rentPerDay * daysRemainingInMonth);
     const totalRent = dynamicRent + hostelDetails.admissionFees
 
-    res.status(200).json({ dynamicRent,totalRent,monthlyRent,admitFee})
+    res.status(200).json({ dynamicRent, totalRent, monthlyRent, admitFee })
   } catch (err) {
     console.log("error reaches here");
     res.status(500).json({ message: "Internal Server Error" })
   }
 }
 
-export const payMentDatas = async (req,res,next)=>{
-  try{
-      const {order_id,amount ,currency,payment_capture} = req.body;
-      console.log(order_id,amount,currency,payment_capture);
+export const payMentDatas = async (req, res, next) => {
+  try {
+    const { order_id, amount, currency, payment_capture } = req.body;
+    console.log(order_id, amount, currency, payment_capture);
 
-console.log("data",req.body);
-              const razorpayInstance = new Razorpay({
-        key_id: process.env.KEY_ID,
-        key_secret: process.env.KEY_SECRETS,
-      });
-      console.log(process.env.KEY_ID,process.env.KEY_SECRETS,"<<<<<<<<<<");
+    console.log("data", req.body);
+    const razorpayInstance = new Razorpay({
+      key_id: process.env.KEY_ID,
+      key_secret: process.env.KEY_SECRETS,
+    });
+    console.log(process.env.KEY_ID, process.env.KEY_SECRETS, "<<<<<<<<<<");
 
-      const option ={
-       receipt: order_id,
-        amount: amount * 100,
-        currency: "INR",
-        payment_capture:payment_capture
-      }
-      const order = await razorpayInstance.orders.create(option);
-      if(!order) return res.status(500).send("somthing error")
-  
-      res.status(200).json({ success: true, data:order });
-
-        
-    } catch (error) {
-        console.log(error);
+    const option = {
+      receipt: order_id,
+      amount: amount * 100,
+      currency: "INR",
+      payment_capture: payment_capture
     }
-}
+    const order = await razorpayInstance.orders.create(option);
+    if (!order) return res.status(500).send("somthing error")
+
+    res.status(200).json({ success: true, data: order });
 
 
-export const paymentVerification = async (req,res,next) => {
-  try{
-
-    console.log(req.body,'in payment controllelr');
-  }catch(err){
-    res.status(500).json({message : "Success"})
+  } catch (error) {
+    console.log(error);
   }
 }
+
+
+export const paymentVerification = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const razorpayInstance = new Razorpay({
+      key_id: process.env.KEY_ID,
+      key_secret: process.env.KEY_SECRETS,
+    });
+
+    const { orderId, rentPayment } = req.body;
+    const roomId = rentPayment.room_id;
+   
+    const order = await razorpayInstance.orders.fetch(orderId);
+
+    if (!order) {
+      return res.status(500).send("Something went wrong");
+    }
+
+    if (order.status === "paid") {
+      console.log("Payment success");
+
+      const room = await HostelRooms.findById(roomId);
+      if (room) {
+        room.occupants += 1;
+        await room.save();
+      }
+
+      const newPayment = new Payment({
+        student: userId,
+        rentAmount: rentPayment.rentAmount,
+        monthOfPayment: rentPayment.monthOfPayment,
+      });
+
+      newPayment.save()
+        .then(async (data) => {
+          const hostel = await HostelInfo.findOne({ rooms: roomId }).populate('adminData');
+          if (hostel) {
+            const admin = hostel.adminData;
+            admin.walletTotal += rentPayment.rentAmount;
+            await admin.save();
+          }
+
+          const student = await Student.findById(userId);
+          if (student) {
+            student.role = "resident";
+            await student.save();
+
+            const payload = {
+              id: student.id,
+              name: student.fullName,
+              role: student.role,
+            };
+            const token = jwt.sign(payload, process.env.USER_SECRET_KEY, {
+              expiresIn: "3d",
+            });
+
+            const tokenData = {
+              id: student.id,
+              name: student.fullName,
+              token: `Bearer ${token}`,
+              role: student.role,
+            };
+
+            res.status(200).json({ success: true, data: { order, tokenData } });
+          } else {
+            res.json({ status: false, message: "Student not found" });
+          }
+        })
+        .catch(() => {
+          res.json({ status: false, message: "Order not placed" });
+        });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
 
