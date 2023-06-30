@@ -74,8 +74,6 @@ export const fetchRoomData = async (req, res, next) => {
     const hostelId = req.params.id;
     const { room_type } = req.body;
 
-    console.log(hostelId,room_type);
-
     //const StudentId = req.params.user 
 
     // const StudentData = await Student.findById(StudentId).select('isVerified isRequested')
@@ -88,7 +86,6 @@ export const fetchRoomData = async (req, res, next) => {
       match: { room_type },
       select: 'room_image.url room_rent title description occupants capacity',
     });
-
 
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
@@ -103,9 +100,7 @@ export const fetchRoomData = async (req, res, next) => {
       occupants: room.occupants,
       capacity: room.capacity
     }));
-   console.log(roomData,"roomData");
     res.json({ roomData });
-
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: 'Failed to fetch room data' });
