@@ -115,3 +115,19 @@ export const rejected = async (req, res, next) => {
   }
 };
 
+
+export const hostelData = async (req, res, next) => {
+  try {
+    const hostelData = await HostelInfo.find({})
+      .populate({ path: 'adminData', select: 'email' })
+      .select('hostelName isBlocked');
+
+    const filteredData = hostelData.filter((hostel) => !hostel.isBlocked);
+
+    res.status(200).json(filteredData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
