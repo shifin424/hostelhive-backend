@@ -1,5 +1,5 @@
 import express from 'express';
-import { login ,requests,approval,rejected,hostelData} from '../controllers/superAdmin.js';
+import { login ,requests,approval,rejected,hostelData,blockHostel,unblockHostel} from '../controllers/superAdmin.js';
 import verifyToken from '../middlewares/authorizaion.js'
 
 const superadminRouter = express.Router();
@@ -13,6 +13,10 @@ superadminRouter.patch('/approve-hostel/:id',verifyToken.verifyTokenSuperAdmin,a
 superadminRouter.patch('/reject-hostel/:id',verifyToken.verifyTokenSuperAdmin,rejected)
 
 superadminRouter.get('/fetchHostelData',verifyToken.verifyTokenSuperAdmin,hostelData)
+
+superadminRouter.patch('/block-hostel/:id',verifyToken.verifyTokenSuperAdmin,blockHostel)
+
+superadminRouter.patch('/unblock-hostel/:id',verifyToken.verifyTokenSuperAdmin,unblockHostel)
 
 
 

@@ -15,7 +15,7 @@ dotenv.config()
 export const hostelData = async (req, res, next) => {
   try {
 
-    const hostelListing = await HostelInfo.find({ isApproved: "Approved" }).select('hostelImage.url hostelName')
+    const hostelListing = await HostelInfo.find({ isApproved: "Approved" ,isBlocked:false}).select('hostelImage.url hostelName')
     res.status(200).json(hostelListing)
 
   } catch (err) {
@@ -64,7 +64,7 @@ export const singleHostelView = async (req, res, next) => {
     res.json(data);
   } catch (err) {
     console.log(err);
-    next(err);
+    res.status(200).json({err:'Internal server error'})
   }
 };
 

@@ -122,12 +122,53 @@ export const hostelData = async (req, res, next) => {
       .populate({ path: 'adminData', select: 'email' })
       .select('hostelName isBlocked');
 
-    const filteredData = hostelData.filter((hostel) => !hostel.isBlocked);
-
-    res.status(200).json(filteredData);
+    res.status(200).json(hostelData);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+export const blockHostel = async (req,res,next) =>{
+  try{
+
+    const id = req.params.id
+
+    const hostelData = await HostelInfo.findOne({ _id: id });
+
+    if(hostelData){
+      if(hostelData.isBlocked === false){
+        hostelData.isBlocked = true
+        await hostelData.save();
+
+        res.status(200).json({message:'Success'})
+      }
+    }
+
+  }catch(error){
+  res.status(500).json({error:'Internal Server Error'})
+  }
+}
+
+export const unblockHostel = async (req,res,next) =>{
+  try{
+
+    const id = req.params.id
+
+    const hostelData = await HostelInfo.findOne({ _id: id });
+
+    if(hostelData){
+      if(hostelData.isBlocked === true){
+        hostelData.isBlocked = false
+        await hostelData.save();
+
+        res.status(200).json({message:'Success'})
+      }
+    }
+
+  }catch(error){
+  res.status(500).json({error:'Internal Server Error'})
+  }
+}
 
