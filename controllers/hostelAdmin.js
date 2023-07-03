@@ -6,6 +6,7 @@ import HostelAdmin from "../models/hostelAdmin.js";
 import HostelInfo from "../models/hostelInfo.js";
 import HostelRooms from "../models/hostelroom.js";
 import Student from '../models/studentAuth.js'
+import Menu from "../models/menu.js";
 import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
 import Joi from "joi";
 
@@ -541,3 +542,39 @@ export const rejected = async (req, res, next) => {
     next(err);
   }
 };
+
+export const editMenu = async (req, res, next) => {
+  try {
+    const hostelId = req.params.id;
+    const { breakfast, lunch, snacks, dinner, day } = req.body.values;
+
+
+    let existingMenu = await Menu.findOne({ hostelId, day });
+
+    if (existingMenu) {
+
+      existingMenu.breakfast = breakfast;
+      existingMenu.lunch = lunch;
+      existingMenu.snacks = snacks;
+      existingMenu.dinner = dinner;
+    } else {
+      
+      existingMenu = new Menu({
+        hostelId,
+        day,
+        breakfast,
+        lunch,
+        snacks,
+        dinner,
+      });
+    }
+
+    await existingMenu.save();
+
+    res.status(200).json({ message: 'Food menu updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
