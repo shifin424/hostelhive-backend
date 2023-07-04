@@ -87,7 +87,7 @@ export const signUp = async (req, res, next) => {
       return res.status(400).json({ errors });
     }
 
-    console.log("Reaches here",1)
+    console.log("Reaches here", 1)
     const adminExistByName = await HostelAdmin.findOne({ fullName });
     if (adminExistByName) {
       return res
@@ -139,7 +139,7 @@ export const signUp = async (req, res, next) => {
       gender,
       token,
     };
-console.log(responseData,"backend data");
+    console.log(responseData, "backend data");
     return res.status(200).json(responseData);
   } catch (err) {
     console.log(err);
@@ -171,7 +171,7 @@ export const otpVerification = async (req, res) => {
 
     //const otpVerify = await verifyOtp(mobileNumber, otpCode);
     // if (otpVerify.status == "approved") {
-      if(otpCode){
+    if (otpCode) {
       const adminExistsByEmail = await HostelAdmin.findOne({ email });
       if (adminExistsByEmail) {
         return res
@@ -487,22 +487,22 @@ export const fetchRoomData = async (req, res, next) => {
 export const studentRequestData = async (req, res, next) => {
   try {
     const hostelId = req?.params?.id
-    const StudentRequestData = await Student.find({hostelId ,isRequested: true, isVerified: false, rejectedReason:'none'})
-    .select(" address _id fullName email gender phone ")
-    .populate('hostelId',"hostelName")
-    console.log(StudentRequestData,"backend data");
-   
-    res.status(200).json({ StudentRequestData})
+    const StudentRequestData = await Student.find({ hostelId, isRequested: true, isVerified: false, rejectedReason: 'none' })
+      .select(" address _id fullName email gender phone ")
+      .populate('hostelId', "hostelName")
+    console.log(StudentRequestData, "backend data");
+
+    res.status(200).json({ StudentRequestData })
   } catch (err) {
     res.status(500).json({ error: "Internal Server Error" })
   }
 }
 
-export const approval = async (req,res,next)=>{
-  try{
+export const approval = async (req, res, next) => {
+  try {
     const id = req.params.id
 
-    const studentData = await Student.findOne({_id :id })
+    const studentData = await Student.findOne({ _id: id })
     if (studentData.isVerified === false) {
       studentData.isVerified = true;
       await studentData.save();
@@ -513,21 +513,21 @@ export const approval = async (req,res,next)=>{
       const success = "Already Student Reuest is  approved";
       res.status(200).json({ message: success });
     }
-  }catch(err){
-    res.status(500).json({error:'Internal server error'})
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' })
   }
 }
 
 
 export const rejected = async (req, res, next) => {
   try {
-     const id = req.params.id;
-     const description = req.body.description;
+    const id = req.params.id;
+    const description = req.body.description;
 
-     const studentData = await Student.findOne({ _id: id });
+    const studentData = await Student.findOne({ _id: id });
 
     if (studentData.isVerified === false) {
-      studentData.rejectedReason = description; 
+      studentData.rejectedReason = description;
       await studentData.save();
 
       const success = 'Student Request has been Rejected';
@@ -542,6 +542,52 @@ export const rejected = async (req, res, next) => {
     next(err);
   }
 };
+
+
+export const fetchFoodData = async (req, res, next) => {
+  try {
+    const hostelId = req.params.id;
+
+    const foodData = await Menu.find({ hostelId });
+    console.log(foodData);
+
+    if (!foodData) {
+      return res.status(404).json({ error: 'Menu data not found' });
+    }
+
+    res.status(200).json({ foodData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const addFoodMenu = async (req, res, next) => {
+  try {
+    const hostelId = req.params.id
+    const { day, breakfast, lunch, snacks, dinner } = req.body.values
+    const existingMenu = await Menu.findOne({ hostelId, day });
+    if (existingMenu) {
+      throw new Error(`Menu already exists for hostel ${hostelId} and ${day}`);
+    }
+    const newMenu = new Menu({
+      hostelId,
+      day,
+      breakfast,
+      lunch,
+      snacks,
+      dinner,
+    });
+
+    await newMenu.save();
+
+    res.status(200).json({ message: "Menu added successfully" })
+
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" })
+  }
+}
+
 
 export const editMenu = async (req, res, next) => {
   try {
@@ -558,7 +604,7 @@ export const editMenu = async (req, res, next) => {
       existingMenu.snacks = snacks;
       existingMenu.dinner = dinner;
     } else {
-      
+
       existingMenu = new Menu({
         hostelId,
         day,
@@ -577,4 +623,83 @@ export const editMenu = async (req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const StudentData = async (req, res, next) => {
+  try {
+
+    const hostelId = req.params.id
+
+    const hostelData = await Student.find({ hostelId }).select('isBlocked email fullName phone role')
+    console.log(hostelData);
+
+    if (!hostelData) {
+      res.status(400).json({ message: "No matching Hostel Id found" })
+    }
+
+    res.status(200).json({ hostelData })
+
+  } catch (error) {
+    res.status(500).json({ error: "Internal server Error" })
+  }
+}
+
+export const blockStudent = async (req, res, next) => {
+  try {
+    const userId = req.params.id
+
+    const userData = await Student.findById(userId)
+
+    if (!userData) {
+      res.status(401).json({ message: "user not Found" })
+    }
+    if (userData.isVerified === true) {
+      userData.isBlocked = true;
+      await userData.save();
+
+      const success = 'Student has been Blocked';
+      res.status(200).json({ message: success });
+    }
+
+  } catch (error) {
+    res.status(500).json({ error: "Internal server Error" })
+  }
+}
+
+export const unblockStudent = async (req, res, next) => {
+  try {
+    const userId = req.params.id
+    const userData = await Student.findById(userId)
+    if (!userData) {
+      res.status(401).json({ message: "user not Found" })
+    }
+    if (userData.isVerified === true) {
+      userData.isBlocked = false;
+      await userData.save();
+      const success = 'Student has been Blocked';
+      res.status(200).json({ message: success });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal server Error" })
+  }
+}
+
+export const deleteStudent = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const userData = await Student.findById(userId);
+
+    if (userData) {
+      await Student.findByIdAndDelete(userId);
+      res.status(200).json({ message: 'Student deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'Student not found' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal Server error' });
+  }
+};
+
+
+
 

@@ -15,7 +15,7 @@ dotenv.config()
 export const hostelData = async (req, res, next) => {
   try {
 
-    const hostelListing = await HostelInfo.find({ isApproved: "Approved" ,isBlocked:false}).select('hostelImage.url hostelName')
+    const hostelListing = await HostelInfo.find({ isApproved: "Approved" ,isBlocked:false}).select('hostelImage.url hostelName location')
     res.status(200).json(hostelListing)
 
   } catch (err) {
