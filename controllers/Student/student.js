@@ -5,6 +5,7 @@ import HostelInfo from "../../models/hostelInfo.js";
 import HostelRooms from '../../models/hostelroom.js';
 import Payment from "../../models/payement.js";
 import Student from "../../models/studentAuth.js";
+import Complaints from '../../models/complaints.js'
 import dotenv from 'dotenv'
 import jwt from "jsonwebtoken";
 import Razorpay from 'razorpay'
@@ -104,6 +105,8 @@ export const fetchPaymentData = async (req, res, next) => {
   }
 }
 
+
+
 export const payMentDatas = async (req, res, next) => {
   try {
     const { order_id, amount, currency, payment_capture } = req.body;
@@ -145,7 +148,7 @@ export const paymentVerification = async (req, res, next) => {
 
     const { orderId, rentPayment } = req.body;
     const roomId = rentPayment.room_id;
-   
+
     const order = await razorpayInstance.orders.fetch(orderId);
 
     if (!order) {
@@ -211,6 +214,45 @@ export const paymentVerification = async (req, res, next) => {
   }
 };
 
+export const studentComplaint = async (req, res, next) => {
+  try {
+    const { complaintType, complaintDescription } = req.body.values;
+    const hostelId = req.params.id;
+    const userId = req.user.id;
 
+    const complaint = new Complaints({
+      hostelId,
+      complaintType,
+      complaintDescription,
+      user: userId,
+    });
 
+    await complaint.save();
+
+    res.status(200).json({ message: "Complaint saved successfully!" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const complaintData = async (req, res, next) => {
+  try {
+    const hostelId = req.params.id;
+    const userId = req.user.id;
+
+    const complaints = await Complaints.find({ hostelId, user: userId }).select('_id complaintType complaintDescription status adminResponse createdAt')
+    console.log(complaints);
+
+    const formattedComplaints = complaints.map(complaint => ({
+      ...complaint.toObject(),
+      createdAt: complaint.createdAt.toISOString().split('T')[0]
+    }));
+
+    res.status(200).json({ data: formattedComplaints });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 

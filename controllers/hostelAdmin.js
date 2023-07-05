@@ -86,8 +86,6 @@ export const signUp = async (req, res, next) => {
       }));
       return res.status(400).json({ errors });
     }
-
-    console.log("Reaches here", 1)
     const adminExistByName = await HostelAdmin.findOne({ fullName });
     if (adminExistByName) {
       return res
@@ -227,12 +225,16 @@ export const login = async (req, res) => {
         .json({ error: "Please provide all required fields" });
     }
 
+
     const admin = await HostelAdmin.findOne({ email: email });
 
     if (!admin) {
       return res.status(404).json({ message: "No User Found" });
     }
 
+    if(admin.isBlocked === true){
+      res.status(400).json({message:"Sorry, this user is currently blocked. Please contact the administrator for further assistance."})
+    }else{
     const isMatch = await bcrypt.compare(password, admin.password);
     if (isMatch) {
       const payload = {
@@ -254,6 +256,7 @@ export const login = async (req, res) => {
     } else {
       res.status(401).json({ message: "Incorrect password" });
     }
+  }
   } catch (error) {
     console.error("Error occurred during login:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -453,6 +456,20 @@ export const roomData = async (req, res, next) => {
 };
 
 
+
+export const editRoomData = async (req,res,next)=>{
+  try{
+    const hostelId = req.params.id
+    const hostel = await HostelInfo.findById(hostelId).populate('rooms');
+    const rooms = hostel.rooms;
+  
+    res.status(200).json({data:rooms})
+
+  }catch(error){
+    res.status(500).json("Internal Server Error")
+  }
+}
+
 export const fetchRoomData = async (req, res, next) => {
   try {
     const hostelId = req.params.id;
@@ -562,14 +579,16 @@ export const fetchFoodData = async (req, res, next) => {
   }
 };
 
+
 export const addFoodMenu = async (req, res, next) => {
   try {
     const hostelId = req.params.id
     const { day, breakfast, lunch, snacks, dinner } = req.body.values
     const existingMenu = await Menu.findOne({ hostelId, day });
+
     if (existingMenu) {
-      throw new Error(`Menu already exists for hostel ${hostelId} and ${day}`);
-    }
+      res.json({error:"The day you entered already exists. Please choose a different day"})
+    }else{
     const newMenu = new Menu({
       hostelId,
       day,
@@ -578,15 +597,15 @@ export const addFoodMenu = async (req, res, next) => {
       snacks,
       dinner,
     });
-
-    await newMenu.save();
-
+     await newMenu.save();
     res.status(200).json({ message: "Menu added successfully" })
-
+  }
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Internal Server Error" })
   }
 }
+
 
 
 export const editMenu = async (req, res, next) => {

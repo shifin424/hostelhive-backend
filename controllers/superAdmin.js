@@ -120,8 +120,7 @@ export const hostelData = async (req, res, next) => {
   try {
     const hostelData = await HostelInfo.find({})
       .populate({ path: 'adminData', select: 'email' })
-      .select('hostelName isBlocked');
-
+      .select('_id hostelName isBlocked');
     res.status(200).json(hostelData);
   } catch (error) {
     console.log(error);
@@ -134,13 +133,24 @@ export const blockHostel = async (req,res,next) =>{
   try{
 
     const id = req.params.id
+    const adminId = req.params.adminId
+
 
     const hostelData = await HostelInfo.findOne({ _id: id });
-
+    const adminData = await HostelAdmin.findOne({_id:adminId})
+   
     if(hostelData){
       if(hostelData.isBlocked === false){
         hostelData.isBlocked = true
         await hostelData.save();
+
+        if(adminData){
+          if( adminData.isBlocked === false){
+            adminData.isBlocked = true
+            await adminData.save()
+          }
+         
+        }
 
         res.status(200).json({message:'Success'})
       }
@@ -155,13 +165,23 @@ export const unblockHostel = async (req,res,next) =>{
   try{
 
     const id = req.params.id
+    const adminId = req.params.adminId
 
     const hostelData = await HostelInfo.findOne({ _id: id });
+    const adminData = await HostelAdmin.findOne({_id:adminId})
 
     if(hostelData){
       if(hostelData.isBlocked === true){
         hostelData.isBlocked = false
         await hostelData.save();
+
+        if(adminData){
+          if( adminData.isBlocked === true){
+            adminData.isBlocked = false
+            await adminData.save()
+          }
+         
+        }
 
         res.status(200).json({message:'Success'})
       }

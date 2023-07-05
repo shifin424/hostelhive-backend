@@ -14,9 +14,9 @@ superadminRouter.patch('/reject-hostel/:id',verifyToken.verifyTokenSuperAdmin,re
 
 superadminRouter.get('/fetchHostelData',verifyToken.verifyTokenSuperAdmin,hostelData)
 
-superadminRouter.patch('/block-hostel/:id',verifyToken.verifyTokenSuperAdmin,blockHostel)
+superadminRouter.patch('/block-hostel/:id/:adminId',verifyToken.verifyTokenSuperAdmin,blockHostel)
 
-superadminRouter.patch('/unblock-hostel/:id',verifyToken.verifyTokenSuperAdmin,unblockHostel)
+superadminRouter.patch('/unblock-hostel/:id/:adminId',verifyToken.verifyTokenSuperAdmin,unblockHostel)
 
 
 

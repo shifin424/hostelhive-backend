@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 
 const hosteladminSchema = new mongoose.Schema(
@@ -65,6 +66,10 @@ const hosteladminSchema = new mongoose.Schema(
     qualification: {
       type: String,
       required: true,
+    },
+    isBlocked:{
+      type: Boolean,
+      default: false,
     },
     Address: [
       {

@@ -15,7 +15,12 @@ const verifyTokenSuperAdmin = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token.split(' ')[1], process.env.ADMIN_SECRET);
-        if (decoded) next();
+        if (decoded) {
+            {
+                req.user = decoded
+                next();
+            }
+        }
     } catch (error) {
         next(error);
     }

@@ -20,7 +20,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(errorHandler);
+//app.use(errorHandler);
 app.use(
   cors({
     credentials: true,

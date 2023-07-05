@@ -1,5 +1,5 @@
 import express from "express";
-import {request,BookingData,fetchPaymentData,payMentDatas,paymentVerification} from '../controllers/Student/student.js'
+import {request,BookingData,fetchPaymentData,payMentDatas,paymentVerification,studentComplaint,complaintData} from '../controllers/Student/student.js'
 import VerifyToken from '../middlewares/authorizaion.js'
 
 
@@ -16,6 +16,10 @@ StudentRouter.get('/payment-data/:id',VerifyToken.verifyTokenStudent,fetchPaymen
 StudentRouter.post('/payment-Request',VerifyToken.verifyTokenStudent,payMentDatas)
 
 StudentRouter.post('/payment-verification',VerifyToken.verifyTokenStudent,paymentVerification)
+
+StudentRouter.post('/student-complaint/:id',VerifyToken.verifyTokenStudent,studentComplaint)
+
+StudentRouter.get('/student-complaint-data/:id',VerifyToken.verifyTokenStudent,complaintData)
 
 
 

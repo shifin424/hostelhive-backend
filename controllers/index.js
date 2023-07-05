@@ -14,10 +14,8 @@ dotenv.config()
 
 export const hostelData = async (req, res, next) => {
   try {
-
     const hostelListing = await HostelInfo.find({ isApproved: "Approved" ,isBlocked:false}).select('hostelImage.url hostelName location')
     res.status(200).json(hostelListing)
-
   } catch (err) {
     console.log(err);
   }
@@ -255,15 +253,20 @@ export const OtpVerification = async (req, res, next) => {
   }
 }
 
+
 export const login = async (req,res,next) =>{
   try{
     const {email,password} = req.body
     
     const student = await Student.findOne({ email: email });
+    console.log(student?.isBlocked);
 
     if (!student) {
-      return res.status(404).json({ message: "No User Found" });
+      return res.status(404).json({ message: "The user with the email does not exist" });
     }
+    if(student?.isBlocked === true){
+      res.status(400).json({message:"Sorry, this user is currently blocked. Please contact the administrator for further assistance. "})
+    }else{
 
     const isMatch = await bcrypt.compare(password, student.password);
 
@@ -288,7 +291,7 @@ export const login = async (req,res,next) =>{
     }else {
       res.status(401).json({ message: "Incorrect password" });
     }
-
+  }
   }catch(err){
     console.error("Error occurred during login:",err);
     res.status(500).json({ message: "Internal Server Error" });
