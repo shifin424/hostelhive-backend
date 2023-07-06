@@ -423,7 +423,7 @@ export const roomData = async (req, res, next) => {
 
     const existingRoom = await HostelRooms.findOne({
       room_no: roomNo,
-      _id: { $in: hostel.rooms }, // Check if the room exists within the hostel's rooms
+      _id: { $in: hostel.rooms }, 
     });
 
     if (existingRoom) {
@@ -478,7 +478,7 @@ export const fetchRoomData = async (req, res, next) => {
     if (!hostel) {
       return res.status(404).json({ message: "Hostel not found" });
     }
-
+5
     const roomData = hostel.rooms.map((room) => ({
       _id: room._id,
       roomNo: room.room_no,

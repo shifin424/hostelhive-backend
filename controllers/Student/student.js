@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import Students from '../../models/studentAuth.js'
-import Joi from "joi";
 import HostelInfo from "../../models/hostelInfo.js";
 import HostelRooms from '../../models/hostelroom.js';
 import Payment from "../../models/payement.js";
@@ -9,6 +8,7 @@ import Complaints from '../../models/complaints.js'
 import dotenv from 'dotenv'
 import jwt from "jsonwebtoken";
 import Razorpay from 'razorpay'
+import Menu from "../../models/menu.js";
 dotenv.config()
 
 
@@ -68,7 +68,7 @@ export const request = async (req, res, next) => {
 export const BookingData = async (req, res, next) => {
   try {
     const studentId = req.user.id
-    const bookingStatus = await Students.find({ _id: studentId }).select('isRequested isVerified')
+    const bookingStatus = await Students.find({ _id: studentId }).select('isRequested isVerified hostelId')
 
     res.status(200).json({ bookingStatus })
   } catch (err) {
@@ -255,4 +255,21 @@ export const complaintData = async (req, res, next) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const foodMenu = async (req,res,next)=>{
+  try{
+  
+    const hostelId = req.params.id
+
+    const menuData = await Menu.find({hostelId})
+
+    if(!menuData){
+      res.status(400).json({message:"Empty Food Data"})
+    }else{
+      res.status(200).json({menuData})
+    }
+  }catch(error){
+    res.status(500).json({error:"Internal Server Error"})
+  }
+}
 
