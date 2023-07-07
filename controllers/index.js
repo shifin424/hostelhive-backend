@@ -24,6 +24,7 @@ export const hostelData = async (req, res, next) => {
 export const singleHostelView = async (req, res, next) => {
   try {
     const hostelId = req.params.id
+    console.log(hostelId);
 
     const result = await HostelInfo.findOne({ _id: hostelId, isApproved: "Approved" })
       .populate({
@@ -65,7 +66,6 @@ export const singleHostelView = async (req, res, next) => {
     res.status(200).json({err:'Internal server error'})
   }
 };
-
 
 export const fetchRoomData = async (req, res, next) => {
   try {
