@@ -746,15 +746,8 @@ export const complaintsData = async (req, res, next) => {
 export const editComplaint = async (req, res, next) => {
   try {
     const Id = req.params.id;
-    console.log(req.body);
     const { status, adminResponse } = req.body.values;
-
-    console.log(Id, "<<<<<<<<<", "<<<<<<<<<", status, adminResponse);
-
     const complaintData = await Complaints.findOne({ _id: Id});
-
-    console.log("Checking here");
-    console.log(complaintData);
 
     if (!complaintData) {
       return res.status(400).json({ message: "No Data available" });

@@ -5,6 +5,7 @@ import HostelRooms from '../../models/hostelroom.js';
 import Payment from "../../models/payement.js";
 import Student from "../../models/studentAuth.js";
 import Complaints from '../../models/complaints.js'
+import LeaveLetter from '../../models/LeaveLetter.js'
 import dotenv from 'dotenv'
 import jwt from "jsonwebtoken";
 import Razorpay from 'razorpay'
@@ -256,20 +257,69 @@ export const complaintData = async (req, res, next) => {
   }
 };
 
-export const foodMenu = async (req,res,next)=>{
-  try{
-  
+export const foodMenu = async (req, res, next) => {
+  try {
+
     const hostelId = req.params.id
 
-    const menuData = await Menu.find({hostelId})
+    const menuData = await Menu.find({ hostelId })
 
-    if(!menuData){
-      res.status(400).json({message:"Empty Food Data"})
-    }else{
-      res.status(200).json({menuData})
+    if (!menuData) {
+      res.status(400).json({ message: "Empty Food Data" })
+    } else {
+      res.status(200).json({ menuData })
     }
-  }catch(error){
-    res.status(500).json({error:"Internal Server Error"})
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" })
   }
 }
 
+export const leaveLetter = async (req, res, next) => {
+  try {
+    const { startDate, endDate, description } = req.body.values;
+    const userId = req.user.id;
+    const hostelId = req.params.id;
+
+    const leaveLetter = new LeaveLetter({
+      hostelId,
+      startDate,
+      endDate,
+      description,
+      user: userId,
+    });
+
+    await leaveLetter.save();
+
+    res.status(200).json({
+      id: leaveLetter._id,
+      startDate: leaveLetter.startDate,
+      endDate: leaveLetter.endDate,
+      description: leaveLetter.description,
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+export const fetchLeaveData = async ( req,res,next)=>{
+  try{
+    console.log(req.params.id)
+    const hostelId = req.params.id
+
+    const LeaveData = await LeaveLetter.find({hostelId}).select('startDate endDate description').exec()
+
+    const LeaveDatas = LeaveData.map((leave) => ({
+      ...leave.toObject(),
+      startDate: leave.startDate.toISOString().split('T')[0],
+      endDate: leave.endDate.toISOString().split('T')[0],
+    }));
+
+
+    res.status(200).json({LeaveDatas})
+  }catch(error){
+    console.log(error);
+    res.status(500).json({error:"Internal server error"})
+  }
+}

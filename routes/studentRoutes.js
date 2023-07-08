@@ -1,5 +1,5 @@
 import express from "express";
-import {request,BookingData,fetchPaymentData,payMentDatas,paymentVerification,studentComplaint,complaintData,foodMenu} from '../controllers/Student/student.js'
+import {request,BookingData,fetchPaymentData,payMentDatas,paymentVerification,studentComplaint,complaintData,foodMenu,leaveLetter,fetchLeaveData} from '../controllers/Student/student.js'
 import VerifyToken from '../middlewares/authorizaion.js'
 
 
@@ -22,6 +22,10 @@ StudentRouter.post('/student-complaint/:id',VerifyToken.verifyTokenStudent,stude
 StudentRouter.get('/student-complaint-data/:id',VerifyToken.verifyTokenStudent,complaintData)
 
 StudentRouter.get('/fetch-food-menu/:id',VerifyToken.verifyTokenStudent,foodMenu)
+
+StudentRouter.post('/add-leave-letter/:id',VerifyToken.verifyTokenStudent,leaveLetter)
+
+StudentRouter.get('/fetch-leave-letter/:id',VerifyToken.verifyTokenStudent,fetchLeaveData)
 
 
 
