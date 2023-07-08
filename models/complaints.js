@@ -24,7 +24,7 @@ const completeSchema = new mongoose.Schema(
         },
         adminResponse: {
             type: String,
-            default: "",
+            default: "not Updated",
         },
         user: {
             type:mongoose.Schema.Types.ObjectId,

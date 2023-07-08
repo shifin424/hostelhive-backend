@@ -9,6 +9,7 @@ import Student from '../models/studentAuth.js'
 import Menu from "../models/menu.js";
 import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
 import Joi from "joi";
+import Complaints from "../models/complaints.js";
 
 dotenv.config();
 
@@ -232,31 +233,31 @@ export const login = async (req, res) => {
       return res.status(404).json({ message: "No User Found" });
     }
 
-    if(admin.isBlocked === true){
-      res.status(400).json({message:"Sorry, this user is currently blocked. Please contact the administrator for further assistance."})
-    }else{
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (isMatch) {
-      const payload = {
-        id: admin.id,
-        fullName: admin.fullName,
-      };
-
-      const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "3d",
-      });
-
-      res.json({
-        success: true,
-        id: admin.id,
-        name: admin.fullName,
-        email: admin.email,
-        token: `Bearer ${token}`,
-      });
+    if (admin.isBlocked === true) {
+      res.status(400).json({ message: "Sorry, this user is currently blocked. Please contact the administrator for further assistance." })
     } else {
-      res.status(401).json({ message: "Incorrect password" });
+      const isMatch = await bcrypt.compare(password, admin.password);
+      if (isMatch) {
+        const payload = {
+          id: admin.id,
+          fullName: admin.fullName,
+        };
+
+        const token = jwt.sign(payload, process.env.JWT_SECRET, {
+          expiresIn: "3d",
+        });
+
+        res.json({
+          success: true,
+          id: admin.id,
+          name: admin.fullName,
+          email: admin.email,
+          token: `Bearer ${token}`,
+        });
+      } else {
+        res.status(401).json({ message: "Incorrect password" });
+      }
     }
-  }
   } catch (error) {
     console.error("Error occurred during login:", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -423,7 +424,7 @@ export const roomData = async (req, res, next) => {
 
     const existingRoom = await HostelRooms.findOne({
       room_no: roomNo,
-      _id: { $in: hostel.rooms }, 
+      _id: { $in: hostel.rooms },
     });
 
     if (existingRoom) {
@@ -457,15 +458,15 @@ export const roomData = async (req, res, next) => {
 
 
 
-export const editRoomData = async (req,res,next)=>{
-  try{
+export const editRoomData = async (req, res, next) => {
+  try {
     const hostelId = req.params.id
     const hostel = await HostelInfo.findById(hostelId).populate('rooms');
     const rooms = hostel.rooms;
-  
-    res.status(200).json({data:rooms})
 
-  }catch(error){
+    res.status(200).json({ data: rooms })
+
+  } catch (error) {
     res.status(500).json("Internal Server Error")
   }
 }
@@ -478,7 +479,7 @@ export const fetchRoomData = async (req, res, next) => {
     if (!hostel) {
       return res.status(404).json({ message: "Hostel not found" });
     }
-5
+    5
     const roomData = hostel.rooms.map((room) => ({
       _id: room._id,
       roomNo: room.room_no,
@@ -587,19 +588,19 @@ export const addFoodMenu = async (req, res, next) => {
     const existingMenu = await Menu.findOne({ hostelId, day });
 
     if (existingMenu) {
-      res.json({error:"The day you entered already exists. Please choose a different day"})
-    }else{
-    const newMenu = new Menu({
-      hostelId,
-      day,
-      breakfast,
-      lunch,
-      snacks,
-      dinner,
-    });
-     await newMenu.save();
-    res.status(200).json({ message: "Menu added successfully" })
-  }
+      res.json({ error: "The day you entered already exists. Please choose a different day" })
+    } else {
+      const newMenu = new Menu({
+        hostelId,
+        day,
+        breakfast,
+        lunch,
+        snacks,
+        dinner,
+      });
+      await newMenu.save();
+      res.status(200).json({ message: "Menu added successfully" })
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" })
@@ -720,5 +721,53 @@ export const deleteStudent = async (req, res, next) => {
 };
 
 
+export const complaintsData = async (req, res, next) => {
+  try {
+    console.log(req.params.id);
+
+    const hostelId = req.params.id
+  
+    const complaintDetails = await Complaints.find({ hostelId }).populate('user', 'fullName').select('_id complaintType complaintDescrption status  createdAt adminResponse complaintDescription')
+
+    const formattedComplaints = complaintDetails.map(complaint => ({
+      ...complaint.toObject(),
+      createdAt: complaint.createdAt.toISOString().split('T')[0]
+    }));
 
 
+    console.log(complaintDetails);
+    res.status(200).json({ formattedComplaints })
+
+  } catch (error) {
+    res.status(400).json({ error: "Interal server error" })
+  }
+}
+
+export const editComplaint = async (req, res, next) => {
+  try {
+    const Id = req.params.id;
+    console.log(req.body);
+    const { status, adminResponse } = req.body.values;
+
+    console.log(Id, "<<<<<<<<<", "<<<<<<<<<", status, adminResponse);
+
+    const complaintData = await Complaints.findOne({ _id: Id});
+
+    console.log("Checking here");
+    console.log(complaintData);
+
+    if (!complaintData) {
+      return res.status(400).json({ message: "No Data available" });
+    }
+
+    complaintData.status = status;
+    complaintData.adminResponse = adminResponse;
+
+    await complaintData.save();
+
+    res.status(200).json({ message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
