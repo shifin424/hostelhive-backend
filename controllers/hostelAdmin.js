@@ -10,6 +10,7 @@ import Menu from "../models/menu.js";
 import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
 import Joi from "joi";
 import Complaints from "../models/complaints.js";
+import LeaveLetter from "../models/LeaveLetter.js";
 
 dotenv.config();
 
@@ -764,3 +765,25 @@ export const editComplaint = async (req, res, next) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const LeaveData = async (req,res,next)=>{
+  try{
+   
+    const hostelId = req.params.id
+
+    const LeaveData = await LeaveLetter.find({hostelId}).select('startDate endDate description').exec()
+
+    const LeaveDatas = LeaveData.map((leave) => ({
+      ...leave.toObject(),
+      startDate: leave.startDate.toISOString().split('T')[0],
+      endDate: leave.endDate.toISOString().split('T')[0],
+    }));
+
+
+    res.status(200).json({LeaveDatas})
+
+  }catch(error){
+    console.log(error);
+  res.status(500).json({error:'Internal server error'})
+  }
+}
