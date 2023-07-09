@@ -1,31 +1,30 @@
 import mongoose from "mongoose";
-import HostelAdmin from "../models/hostelAdmin.js";
-import HostelInfo from "../models/hostelInfo.js";
-import Student from "../models/studentAuth.js";
+import HostelAdmin from "../../models/hostelAdmin.js";
+import HostelInfo from "../../models/hostelInfo.js";
+import Student from "../../models/studentAuth.js";
 import bcrypt from "bcrypt";
 import Joi from 'joi';
-import  jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import dotenv from 'dotenv'
-
-
 
 
 dotenv.config()
 
+
+//fetch hostel data
 export const hostelData = async (req, res, next) => {
   try {
-    const hostelListing = await HostelInfo.find({ isApproved: "Approved" ,isBlocked:false}).select('hostelImage.url hostelName location')
+    const hostelListing = await HostelInfo.find({ isApproved: "Approved", isBlocked: false }).select('hostelImage.url hostelName location')
     res.status(200).json(hostelListing)
   } catch (err) {
     console.log(err);
   }
 }
 
+// get single hostel data
 export const singleHostelView = async (req, res, next) => {
   try {
     const hostelId = req.params.id
-    console.log(hostelId);
-
     const result = await HostelInfo.findOne({ _id: hostelId, isApproved: "Approved" })
       .populate({
         path: "rooms",
@@ -58,27 +57,18 @@ export const singleHostelView = async (req, res, next) => {
         room_image,
       })),
     };
-
-    console.log(data, "backend data");
     res.json(data);
   } catch (err) {
     console.log(err);
-    res.status(200).json({err:'Internal server error'})
+    res.status(200).json({ err: 'Internal server error' })
   }
 };
 
+// fetch room data
 export const fetchRoomData = async (req, res, next) => {
   try {
     const hostelId = req.params.id;
     const { room_type } = req.body;
-
-    //const StudentId = req.params.user 
-
-    // const StudentData = await Student.findById(StudentId).select('isVerified isRequested')
-
-    // console.log(StudentData);
-    
-
     const hostel = await HostelInfo.findById(hostelId).populate({
       path: 'rooms',
       match: { room_type },
@@ -88,9 +78,8 @@ export const fetchRoomData = async (req, res, next) => {
     if (!hostel) {
       return res.status(404).json({ message: 'Hostel not found' });
     }
-
     const roomData = hostel?.rooms?.map(room => ({
-      _id:room._id,
+      _id: room._id,
       url: room.room_image.url,
       rent: room.room_rent,
       title: room.title,
@@ -105,15 +94,10 @@ export const fetchRoomData = async (req, res, next) => {
   }
 };
 
-
-
+// singup data
 export const signup = async (req, res, next) => {
   try {
-
     const { fullName, email, phone, gender, password, confirmPassword } = req.body
-
-    console.log(fullName);
-
 
     const schema = Joi.object({
       fullName: Joi.string().required().messages({
@@ -148,13 +132,13 @@ export const signup = async (req, res, next) => {
             'Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number',
           'any.required': 'Password is required',
         }),
-        confirmPassword: Joi.string()
+      confirmPassword: Joi.string()
         .valid(Joi.ref('password'))
         .required()
         .messages({ 'any.only': "Passwords don't match", 'any.required': 'Confirm Password is required' }),
     });
 
-    const { error } = schema.validate({ fullName, email, phone, gender, password, confirmPassword},{ abortEarly: true });
+    const { error } = schema.validate({ fullName, email, phone, gender, password, confirmPassword }, { abortEarly: true });
 
     if (error) {
       const errors = error.details.map((detail) => ({
@@ -171,11 +155,11 @@ export const signup = async (req, res, next) => {
         { email: email }
       ]
     });
-    
+
     if (isExist) {
       res.status(400).json({ message: "User with this name, phone, or email already exists" });
     }
-    
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -186,7 +170,6 @@ export const signup = async (req, res, next) => {
       gender,
       email,
     };
-console.log(AuthData,"Backend data");
     res.status(200).json({ response: AuthData });
   } catch (err) {
     console.log(err);
@@ -194,11 +177,10 @@ console.log(AuthData,"Backend data");
   }
 };
 
+// otp data 
 export const OtpVerification = async (req, res, next) => {
   try {
-   
-    const  { fullName, email, phone, gender, password } = req.body 
-
+    const { fullName, email, phone, gender, password } = req.body
     const schema = Joi.object({
       fullName: Joi.string().required().messages({
         'any.required': 'fullName is required',
@@ -223,14 +205,12 @@ export const OtpVerification = async (req, res, next) => {
         'any.required': 'Gender is required',
       }),
       password: Joi.string()
-      .required()
-      .messages({
-        'any.required': 'Password is required',
-      })
+        .required()
+        .messages({
+          'any.required': 'Password is required',
+        })
     });
-
-    const { error } = schema.validate({ fullName, email, phone, gender, password},{ abortEarly: true });
-
+    const { error } = schema.validate({ fullName, email, phone, gender, password }, { abortEarly: true });
     if (error) {
       const errors = error.details.map((detail) => ({
         field: detail.path[0],
@@ -240,11 +220,11 @@ export const OtpVerification = async (req, res, next) => {
     }
 
     const StudentAuth = await Student.create({
-    fullName,
-    email,
-    phone,
-    password,
-    gender,
+      fullName,
+      email,
+      phone,
+      password,
+      gender,
     });
 
     res.status(200).json({ message: "success" })
@@ -253,58 +233,49 @@ export const OtpVerification = async (req, res, next) => {
   }
 }
 
-
-export const login = async (req,res,next) =>{
-  try{
-    const {email,password} = req.body
-    
+// login data
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body
     const student = await Student.findOne({ email: email });
-    console.log(student?.isBlocked);
 
     if (!student) {
       return res.status(404).json({ message: "The user with the email does not exist" });
     }
-    if(student?.isBlocked === true){
-      res.status(400).json({message:"Sorry, this user is currently blocked. Please contact the administrator for further assistance. "})
-    }else{
+    if (student?.isBlocked === true) {
+      res.status(400).json({ message: "Sorry, this user is currently blocked. Please contact the administrator for further assistance. " })
+    } else {
 
-    const isMatch = await bcrypt.compare(password, student.password);
+      const isMatch = await bcrypt.compare(password, student.password);
+      if (isMatch) {
+        const payload = {
+          id: student.id,
+          fullName: student.fullName,
+        };
 
-    if (isMatch) {
-      const payload = {
-        id: student.id,
-        fullName: student.fullName,
-      };
+        const token = jwt.sign(payload, process.env.USER_SECRET_KEY, {
+          expiresIn: "3d",
+        });
 
-      const token = jwt.sign(payload, process.env.USER_SECRET_KEY, {
-        expiresIn: "3d",
-      });
+        res.json({
+          success: true,
+          id: student.id,
+          name: student.fullName,
+          token: `Bearer ${token}`,
+          role: student.role
+        });
 
-      res.json({
-        success: true,
-        id: student.id,
-        name: student.fullName,
-        token: `Bearer ${token}`,
-        role :student.role
-      });
-
-    }else {
-      res.status(401).json({ message: "Incorrect password" });
+      } else {
+        res.status(401).json({ message: "Incorrect password" });
+      }
     }
-  }
-  }catch(err){
-    console.error("Error occurred during login:",err);
+  } catch (err) {
+    console.error("Error occurred during login:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-// export const request = async (req,res,next) =>{
-//   try{
-    
-//   }catch{
-//     console.log(err);
-//   }
-// }
+
 
 
 

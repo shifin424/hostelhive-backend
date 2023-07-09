@@ -2,18 +2,19 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import HostelAdmin from "../models/hostelAdmin.js";
-import HostelInfo from "../models/hostelInfo.js";
-import HostelRooms from "../models/hostelroom.js";
-import Student from '../models/studentAuth.js'
-import Menu from "../models/menu.js";
-import { sendOtp, verifyOtp } from "../helpers/twilioOtp.js";
+import HostelAdmin from "../../models/hostelAdmin.js";
+import HostelInfo from "../../models/hostelInfo.js";
+import HostelRooms from "../../models/hostelroom.js";
+import Student from '../../models/studentAuth.js'
+import Menu from "../../models/menu.js";
+import { sendOtp, verifyOtp } from "../../helpers/twilioOtp.js";
 import Joi from "joi";
-import Complaints from "../models/complaints.js";
-import LeaveLetter from "../models/LeaveLetter.js";
+import Complaints from "../../models/complaints.js";
+import LeaveLetter from "../../models/LeaveLetter.js";
 
 dotenv.config();
 
+// signup data
 export const signUp = async (req, res, next) => {
   try {
     const {
@@ -95,10 +96,8 @@ export const signUp = async (req, res, next) => {
         .json({ message: "User with this name already exists" });
     }
 
-    console.log("Reaches here ,2")
     const adminExistsByEmail = await HostelAdmin.findOne({ email });
     if (adminExistsByEmail) {
-      console.log("backend");
       return res
         .status(400)
         .json({ message: "User with this email already exists" });
@@ -113,7 +112,6 @@ export const signUp = async (req, res, next) => {
         .json({ message: "User with this mobile number already exists" });
     }
 
-    console.log("Reaches here  otp");
     // const otpSend = await sendOtp(mobileNumber);
     // if (!otpSend) {
     //   return res.status(500).json({ error: "Failed to send OTP" });
@@ -139,7 +137,6 @@ export const signUp = async (req, res, next) => {
       gender,
       token,
     };
-    console.log(responseData, "backend data");
     return res.status(200).json(responseData);
   } catch (err) {
     console.log(err);
@@ -147,6 +144,7 @@ export const signUp = async (req, res, next) => {
   }
 };
 
+// otp data
 export const otpVerification = async (req, res) => {
   try {
     const {
@@ -217,6 +215,7 @@ export const otpVerification = async (req, res) => {
   }
 };
 
+// login data
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -227,13 +226,10 @@ export const login = async (req, res) => {
         .json({ error: "Please provide all required fields" });
     }
 
-
     const admin = await HostelAdmin.findOne({ email: email });
-
     if (!admin) {
       return res.status(404).json({ message: "No User Found" });
     }
-
     if (admin.isBlocked === true) {
       res.status(400).json({ message: "Sorry, this user is currently blocked. Please contact the administrator for further assistance." })
     } else {
@@ -243,7 +239,6 @@ export const login = async (req, res) => {
           id: admin.id,
           fullName: admin.fullName,
         };
-
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
           expiresIn: "3d",
         });
@@ -265,6 +260,7 @@ export const login = async (req, res) => {
   }
 };
 
+// add hostels
 export const addHostel = async (req, res, next) => {
   try {
     const Admin = req.user.id;
@@ -353,9 +349,6 @@ export const addHostel = async (req, res, next) => {
     }
 
     const hostelAdmin = await HostelAdmin.findOne({ _id: Admin });
-
-    console.log(hostelAdmin, 1);
-
     const existingHostel = await HostelInfo.findOne({ hostelName: title });
     if (existingHostel) {
       return res.status(400).json({ message: "Hostel name already exists" });
@@ -391,6 +384,7 @@ export const addHostel = async (req, res, next) => {
   }
 };
 
+// fetch hostel data
 export const hostelData = async (req, res, next) => {
   try {
     const adminId = req.user.id;
@@ -404,6 +398,7 @@ export const hostelData = async (req, res, next) => {
   }
 };
 
+// hostel room data
 export const roomData = async (req, res, next) => {
   try {
     const {
@@ -457,8 +452,7 @@ export const roomData = async (req, res, next) => {
   }
 };
 
-
-
+// hostel edit room data
 export const editRoomData = async (req, res, next) => {
   try {
     const hostelId = req.params.id
@@ -472,6 +466,7 @@ export const editRoomData = async (req, res, next) => {
   }
 }
 
+// fetch room data
 export const fetchRoomData = async (req, res, next) => {
   try {
     const hostelId = req.params.id;
@@ -503,6 +498,7 @@ export const fetchRoomData = async (req, res, next) => {
   }
 };
 
+// hostel student data
 export const studentRequestData = async (req, res, next) => {
   try {
     const hostelId = req?.params?.id
@@ -517,6 +513,7 @@ export const studentRequestData = async (req, res, next) => {
   }
 }
 
+// student hostel entry approval
 export const approval = async (req, res, next) => {
   try {
     const id = req.params.id
@@ -537,7 +534,7 @@ export const approval = async (req, res, next) => {
   }
 }
 
-
+// student entry rejection
 export const rejected = async (req, res, next) => {
   try {
     const id = req.params.id;
@@ -562,13 +559,11 @@ export const rejected = async (req, res, next) => {
   }
 };
 
-
+// fetch menu data
 export const fetchFoodData = async (req, res, next) => {
   try {
     const hostelId = req.params.id;
-
     const foodData = await Menu.find({ hostelId });
-    console.log(foodData);
 
     if (!foodData) {
       return res.status(404).json({ error: 'Menu data not found' });
@@ -581,7 +576,7 @@ export const fetchFoodData = async (req, res, next) => {
   }
 };
 
-
+// adding menu
 export const addFoodMenu = async (req, res, next) => {
   try {
     const hostelId = req.params.id
@@ -608,13 +603,11 @@ export const addFoodMenu = async (req, res, next) => {
   }
 }
 
-
-
+// edit menu
 export const editMenu = async (req, res, next) => {
   try {
     const hostelId = req.params.id;
     const { breakfast, lunch, snacks, dinner, day } = req.body.values;
-
 
     let existingMenu = await Menu.findOne({ hostelId, day });
 
@@ -645,11 +638,11 @@ export const editMenu = async (req, res, next) => {
   }
 };
 
+// fetch student data
 export const StudentData = async (req, res, next) => {
   try {
 
     const hostelId = req.params.id
-
     const hostelData = await Student.find({ hostelId }).select('isBlocked email fullName phone role')
     console.log(hostelData);
 
@@ -664,6 +657,7 @@ export const StudentData = async (req, res, next) => {
   }
 }
 
+// student blocking
 export const blockStudent = async (req, res, next) => {
   try {
     const userId = req.params.id
@@ -686,6 +680,7 @@ export const blockStudent = async (req, res, next) => {
   }
 }
 
+// unblock student data
 export const unblockStudent = async (req, res, next) => {
   try {
     const userId = req.params.id
@@ -704,6 +699,7 @@ export const unblockStudent = async (req, res, next) => {
   }
 }
 
+// student data removal
 export const deleteStudent = async (req, res, next) => {
   try {
     const userId = req.params.id;
@@ -721,22 +717,17 @@ export const deleteStudent = async (req, res, next) => {
   }
 };
 
-
+// fetch complaint data
 export const complaintsData = async (req, res, next) => {
   try {
-    console.log(req.params.id);
-
-    const hostelId = req.params.id
   
+    const hostelId = req.params.id
     const complaintDetails = await Complaints.find({ hostelId }).populate('user', 'fullName').select('_id complaintType complaintDescrption status  createdAt adminResponse complaintDescription')
-
     const formattedComplaints = complaintDetails.map(complaint => ({
       ...complaint.toObject(),
       createdAt: complaint.createdAt.toISOString().split('T')[0]
     }));
 
-
-    console.log(complaintDetails);
     res.status(200).json({ formattedComplaints })
 
   } catch (error) {
@@ -744,11 +735,12 @@ export const complaintsData = async (req, res, next) => {
   }
 }
 
+// edit complaint data
 export const editComplaint = async (req, res, next) => {
   try {
     const Id = req.params.id;
     const { status, adminResponse } = req.body.values;
-    const complaintData = await Complaints.findOne({ _id: Id});
+    const complaintData = await Complaints.findOne({ _id: Id });
 
     if (!complaintData) {
       return res.status(400).json({ message: "No Data available" });
@@ -766,24 +758,20 @@ export const editComplaint = async (req, res, next) => {
   }
 };
 
-export const LeaveData = async (req,res,next)=>{
-  try{
-   
+// student leave data
+export const LeaveData = async (req, res, next) => {
+  try {
     const hostelId = req.params.id
-
-    const LeaveData = await LeaveLetter.find({hostelId}).select('startDate endDate description').exec()
-
+    const LeaveData = await LeaveLetter.find({ hostelId }).select('startDate endDate description').exec()
     const LeaveDatas = LeaveData.map((leave) => ({
       ...leave.toObject(),
       startDate: leave.startDate.toISOString().split('T')[0],
       endDate: leave.endDate.toISOString().split('T')[0],
     }));
+    res.status(200).json({ LeaveDatas })
 
-
-    res.status(200).json({LeaveDatas})
-
-  }catch(error){
+  } catch (error) {
     console.log(error);
-  res.status(500).json({error:'Internal server error'})
+    res.status(500).json({ error: 'Internal server error' })
   }
 }

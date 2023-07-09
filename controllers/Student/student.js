@@ -13,36 +13,31 @@ import Menu from "../../models/menu.js";
 dotenv.config()
 
 
+// student hostel verificaion data
 export const request = async (req, res, next) => {
   try {
     const roomId = req.params.id;
     const userId = req.user.id;
     const userData = req.body;
     const id = req.params.hostelId
-    console.log(id);
-
     const hostel = await HostelInfo.findOne({ rooms: roomId });
     if (!hostel) {
       return res.status(404).json({ error: 'Room with Hostel is not found' });
     }
-
     const student = await Students.findOne({ _id: userId }, { gender: 1 });
     const studentGender = student.gender
     const hostelType = hostel.hostelType
-
 
     if (hostelType !== 'all') {
       if (
         (studentGender === 'female' && hostelType === 'boys') ||
         (studentGender === 'male' && hostelType === 'girls')
       ) {
-        console.log("Before sending 400 res")
         return res.status(400).json({
           message: `This hostel is not suitable for ${studentGender} students.`,
         });
       }
     }
-
 
     const user = await Students.findByIdAndUpdate(userId, {
       $set: {
@@ -65,7 +60,7 @@ export const request = async (req, res, next) => {
   }
 };
 
-
+// fetch booking data
 export const BookingData = async (req, res, next) => {
   try {
     const studentId = req.user.id
@@ -77,13 +72,13 @@ export const BookingData = async (req, res, next) => {
   }
 }
 
+// fetch payment data
 export const fetchPaymentData = async (req, res, next) => {
   try {
     const roomId = req.params.id
 
     const roomDetails = await HostelRooms.findById(roomId)
     const hostelDetails = await HostelInfo.findOne({ 'rooms': roomId }).populate('rooms')
-
 
     const now = new Date();
     const daysInMonth = new Date(
@@ -106,20 +101,14 @@ export const fetchPaymentData = async (req, res, next) => {
   }
 }
 
-
-
+// student payment verificaion 
 export const payMentDatas = async (req, res, next) => {
   try {
     const { order_id, amount, currency, payment_capture } = req.body;
-    console.log(order_id, amount, currency, payment_capture);
-
-    console.log("data", req.body);
     const razorpayInstance = new Razorpay({
       key_id: process.env.KEY_ID,
       key_secret: process.env.KEY_SECRETS,
     });
-    console.log(process.env.KEY_ID, process.env.KEY_SECRETS, "<<<<<<<<<<");
-
     const option = {
       receipt: order_id,
       amount: amount * 100,
@@ -128,16 +117,13 @@ export const payMentDatas = async (req, res, next) => {
     }
     const order = await razorpayInstance.orders.create(option);
     if (!order) return res.status(500).send("somthing error")
-
     res.status(200).json({ success: true, data: order });
-
-
   } catch (error) {
     console.log(error);
   }
 }
 
-
+// payment conifrimation
 export const paymentVerification = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -215,6 +201,7 @@ export const paymentVerification = async (req, res, next) => {
   }
 };
 
+// student complaint dat
 export const studentComplaint = async (req, res, next) => {
   try {
     const { complaintType, complaintDescription } = req.body.values;
@@ -237,14 +224,13 @@ export const studentComplaint = async (req, res, next) => {
   }
 };
 
+// fetch complaint data
 export const complaintData = async (req, res, next) => {
   try {
     const hostelId = req.params.id;
     const userId = req.user.id;
 
     const complaints = await Complaints.find({ hostelId, user: userId }).select('_id complaintType complaintDescription status adminResponse createdAt')
-    console.log(complaints);
-
     const formattedComplaints = complaints.map(complaint => ({
       ...complaint.toObject(),
       createdAt: complaint.createdAt.toISOString().split('T')[0]
@@ -257,13 +243,11 @@ export const complaintData = async (req, res, next) => {
   }
 };
 
+// fetch menu data
 export const foodMenu = async (req, res, next) => {
   try {
-
     const hostelId = req.params.id
-
     const menuData = await Menu.find({ hostelId })
-
     if (!menuData) {
       res.status(400).json({ message: "Empty Food Data" })
     } else {
@@ -274,6 +258,7 @@ export const foodMenu = async (req, res, next) => {
   }
 }
 
+// leave data
 export const leaveLetter = async (req, res, next) => {
   try {
     const { startDate, endDate, description } = req.body.values;
@@ -302,13 +287,13 @@ export const leaveLetter = async (req, res, next) => {
   }
 };
 
-
-export const fetchLeaveData = async ( req,res,next)=>{
-  try{
+// fetch leave data
+export const fetchLeaveData = async (req, res, next) => {
+  try {
     console.log(req.params.id)
     const hostelId = req.params.id
 
-    const LeaveData = await LeaveLetter.find({hostelId}).select('startDate endDate description').exec()
+    const LeaveData = await LeaveLetter.find({ hostelId }).select('startDate endDate description').exec()
 
     const LeaveDatas = LeaveData.map((leave) => ({
       ...leave.toObject(),
@@ -316,10 +301,9 @@ export const fetchLeaveData = async ( req,res,next)=>{
       endDate: leave.endDate.toISOString().split('T')[0],
     }));
 
-
-    res.status(200).json({LeaveDatas})
-  }catch(error){
+    res.status(200).json({ LeaveDatas })
+  } catch (error) {
     console.log(error);
-    res.status(500).json({error:"Internal server error"})
+    res.status(500).json({ error: "Internal server error" })
   }
 }

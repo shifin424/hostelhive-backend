@@ -1,14 +1,14 @@
 import express from "express";
-import { signUp, otpVerification, login, addHostel, hostelData, roomData, fetchRoomData, studentRequestData,complaintsData, approval, rejected, editMenu, fetchFoodData,StudentData,blockStudent,unblockStudent ,deleteStudent,addFoodMenu,editRoomData,LeaveData,
-    editComplaint} from '../controllers/hostelAdmin.js';
+import {
+    signUp, otpVerification, login, addHostel, hostelData, roomData,
+    fetchRoomData, studentRequestData, complaintsData, approval, rejected,
+    editMenu, fetchFoodData, StudentData, blockStudent, unblockStudent,
+    deleteStudent, addFoodMenu, editRoomData, LeaveData, editComplaint
+} from '../controllers/Hostel/hostelAdmin.js';
 import uploadImage from '../config/cloudinary.js'
 import veryfyToken from '../middlewares/authorizaion.js'
 
-
-
-
 const hosteladminRouter = express.Router();
-
 
 
 hosteladminRouter.post('/signing', signUp);
@@ -25,7 +25,7 @@ hosteladminRouter.post('/add-rooms/:id', veryfyToken.verifyTokenHostelAdmin, upl
 
 hosteladminRouter.get('/room-data/:id', veryfyToken.verifyTokenHostelAdmin, fetchRoomData)
 
-hosteladminRouter.get('/edit-room-data/:id',veryfyToken.verifyTokenHostelAdmin, editRoomData)
+hosteladminRouter.get('/edit-room-data/:id', veryfyToken.verifyTokenHostelAdmin, editRoomData)
 
 hosteladminRouter.get('/fetchRequestData/:id', veryfyToken.verifyTokenHostelAdmin, studentRequestData)
 
@@ -39,19 +39,19 @@ hosteladminRouter.get('/fetch-food-menu/:id', veryfyToken.verifyTokenHostelAdmin
 
 hosteladminRouter.get('/fetch-student-data/:id', veryfyToken.verifyTokenHostelAdmin, StudentData)
 
-hosteladminRouter.patch('/block-student/:id',veryfyToken.verifyTokenHostelAdmin,blockStudent)
+hosteladminRouter.patch('/block-student/:id', veryfyToken.verifyTokenHostelAdmin, blockStudent)
 
-hosteladminRouter.patch('/unblock-student/:id',veryfyToken.verifyTokenHostelAdmin,unblockStudent)
+hosteladminRouter.patch('/unblock-student/:id', veryfyToken.verifyTokenHostelAdmin, unblockStudent)
 
-hosteladminRouter.patch('/delete-student/:id',veryfyToken.verifyTokenHostelAdmin,deleteStudent)
+hosteladminRouter.patch('/delete-student/:id', veryfyToken.verifyTokenHostelAdmin, deleteStudent)
 
-hosteladminRouter.post('/add-food-menu/:id',veryfyToken.verifyTokenHostelAdmin,addFoodMenu)
+hosteladminRouter.post('/add-food-menu/:id', veryfyToken.verifyTokenHostelAdmin, addFoodMenu)
 
-hosteladminRouter.get('/complaints-data/:id',veryfyToken.verifyTokenHostelAdmin,complaintsData)
+hosteladminRouter.get('/complaints-data/:id', veryfyToken.verifyTokenHostelAdmin, complaintsData)
 
-hosteladminRouter.patch('/edit-complaints-data/:id',veryfyToken.verifyTokenHostelAdmin,editComplaint)
+hosteladminRouter.patch('/edit-complaints-data/:id', veryfyToken.verifyTokenHostelAdmin, editComplaint)
 
-hosteladminRouter.get('/fetch-leave-data/:id',veryfyToken.verifyTokenHostelAdmin,LeaveData)
+hosteladminRouter.get('/fetch-leave-data/:id', veryfyToken.verifyTokenHostelAdmin, LeaveData)
 
 
 export default hosteladminRouter;

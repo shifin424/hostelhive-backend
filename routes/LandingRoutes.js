@@ -1,21 +1,23 @@
 import express from "express";
-import {hostelData,singleHostelView ,fetchRoomData,signup,OtpVerification,login} from '../controllers/index.js';
+import {
+    hostelData, singleHostelView, fetchRoomData,
+    signup, OtpVerification, login
+} from '../controllers/Landing/index.js';
+
+const LandingPageRouter = express.Router();
 
 
-const LandingPageRouter = express.Router(); 
+LandingPageRouter.get('/hostel-info', hostelData)
 
+LandingPageRouter.get('/hostel-over-view/:id', singleHostelView)
 
-LandingPageRouter.get('/hostel-info',hostelData)
+LandingPageRouter.post('/hostel-room-data/:id', fetchRoomData)
 
-LandingPageRouter.get('/hostel-over-view/:id',singleHostelView)
+LandingPageRouter.post('/signup', signup)
 
-LandingPageRouter.post('/hostel-room-data/:id',fetchRoomData)
+LandingPageRouter.post('/otp', OtpVerification)
 
-LandingPageRouter.post('/signup',signup)
-
-LandingPageRouter.post('/otp',OtpVerification)
-
-LandingPageRouter.post('/login',login)
+LandingPageRouter.post('/login', login)
 
 
 
