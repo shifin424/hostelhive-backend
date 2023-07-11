@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import HostelAdmin from "../../models/hostelAdmin.js";
 import HostelInfo from "../../models/hostelInfo.js";
 import Student from "../../models/studentAuth.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import Joi from 'joi';
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv'

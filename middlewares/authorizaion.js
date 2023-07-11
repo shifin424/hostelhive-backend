@@ -60,7 +60,6 @@ const verifyTokenHostelAdmin = (req, res, next) => {
 const verifyTokenStudent = (req, res, next) => {
     
     const token = req.headers.authorization;
-    console.log(token,"StudentToken");
     if (!token) {
         const error = new Error('No token provided');
         error.statusCode = 401;

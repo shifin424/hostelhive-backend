@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import HostelInfo from "../../models/hostelInfo.js";
 import HostelAdmin from '../../models/hostelAdmin.js'
 

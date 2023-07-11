@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Students from '../../models/studentAuth.js'
 import HostelInfo from "../../models/hostelInfo.js";
-import HostelRooms from '../../models/hostelroom.js';
+import HostelRooms from '../../models/hostelRoom.js';
 import Payment from "../../models/payement.js";
 import Student from "../../models/studentAuth.js";
 import Complaints from '../../models/complaints.js'
@@ -127,6 +127,8 @@ export const payMentDatas = async (req, res, next) => {
 export const paymentVerification = async (req, res, next) => {
   try {
     const userId = req.user.id;
+    console.log(userId, "Checking user id");
+    const hostelId = req.params.id
 
     const razorpayInstance = new Razorpay({
       key_id: process.env.KEY_ID,
@@ -143,8 +145,6 @@ export const paymentVerification = async (req, res, next) => {
     }
 
     if (order.status === "paid") {
-      console.log("Payment success");
-
       const room = await HostelRooms.findById(roomId);
       if (room) {
         room.occupants += 1;
@@ -155,6 +155,7 @@ export const paymentVerification = async (req, res, next) => {
         student: userId,
         rentAmount: rentPayment.rentAmount,
         monthOfPayment: rentPayment.monthOfPayment,
+        hostelId: hostelId
       });
 
       newPayment.save()
@@ -176,6 +177,7 @@ export const paymentVerification = async (req, res, next) => {
               name: student.fullName,
               role: student.role,
             };
+            console.log(payload, "<<<<<<<<<<< token data");
             const token = jwt.sign(payload, process.env.USER_SECRET_KEY, {
               expiresIn: "3d",
             });
@@ -307,3 +309,26 @@ export const fetchLeaveData = async (req, res, next) => {
     res.status(500).json({ error: "Internal server error" })
   }
 }
+
+// fetch rent History
+export const rentHistory = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const hostelId = req.params.id;
+    console.log(userId);
+    console.log(hostelId);
+
+    const rentData = await Payment.find({
+      student: userId,
+      hostelId: hostelId
+    }).populate('student', 'fullName');
+    const formattedRentData = rentData.map(rent => ({
+      ...rent.toObject(),
+      createdAt: rent.createdAt.toISOString().split('T')[0]
+    }));
+
+    res.status(200).json({ rentData: formattedRentData });
+  } catch (error) {
+    res.status(400).json({ error: "Internal server error" });
+  }
+};

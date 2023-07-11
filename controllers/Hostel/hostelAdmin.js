@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import HostelAdmin from "../../models/hostelAdmin.js";
 import HostelInfo from "../../models/hostelInfo.js";
-import HostelRooms from "../../models/hostelroom.js";
+import HostelRooms from "../../models/hostelRoom.js";
 import Student from '../../models/studentAuth.js'
 import Menu from "../../models/menu.js";
 import { sendOtp, verifyOtp } from "../../helpers/twilioOtp.js";

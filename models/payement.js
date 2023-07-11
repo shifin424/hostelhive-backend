@@ -5,6 +5,10 @@ const paymentSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Student',
         },
+        hostelId:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'HostelInfo',
+        },
         rentAmount: {
             type: Number,
             required: true
