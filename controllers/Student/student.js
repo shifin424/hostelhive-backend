@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import cron from 'node-cron'
+import RentInfo from "../../models/RentInfo.js";
 import Students from '../../models/studentAuth.js'
 import HostelInfo from "../../models/hostelInfo.js";
 import HostelRooms from '../../models/hostelRoom.js';
@@ -123,12 +125,13 @@ export const payMentDatas = async (req, res, next) => {
   }
 }
 
-// payment conifrimation
+// payment conifrimation0
 export const paymentVerification = async (req, res, next) => {
   try {
+    
     const userId = req.user.id;
-    console.log(userId, "Checking user id");
     const hostelId = req.params.id
+    console.log(hostelId, "checking hostel Id");
 
     const razorpayInstance = new Razorpay({
       key_id: process.env.KEY_ID,
@@ -136,7 +139,9 @@ export const paymentVerification = async (req, res, next) => {
     });
 
     const { orderId, rentPayment } = req.body;
+    console.log(rentPayment, "checking room data");
     const roomId = rentPayment.room_id;
+    console.log(roomId, "room Id");
 
     const order = await razorpayInstance.orders.fetch(orderId);
 
@@ -150,6 +155,7 @@ export const paymentVerification = async (req, res, next) => {
         room.occupants += 1;
         await room.save();
       }
+
 
       const newPayment = new Payment({
         student: userId,
@@ -169,15 +175,15 @@ export const paymentVerification = async (req, res, next) => {
 
           const student = await Student.findById(userId);
           if (student) {
+            student.roomData = roomId;
             student.role = "resident";
             await student.save();
-
+              
             const payload = {
               id: student.id,
               name: student.fullName,
               role: student.role,
             };
-            console.log(payload, "<<<<<<<<<<< token data");
             const token = jwt.sign(payload, process.env.USER_SECRET_KEY, {
               expiresIn: "3d",
             });
@@ -202,6 +208,7 @@ export const paymentVerification = async (req, res, next) => {
     next(error);
   }
 };
+
 
 // student complaint dat
 export const studentComplaint = async (req, res, next) => {
@@ -322,6 +329,7 @@ export const rentHistory = async (req, res, next) => {
       student: userId,
       hostelId: hostelId
     }).populate('student', 'fullName');
+
     const formattedRentData = rentData.map(rent => ({
       ...rent.toObject(),
       createdAt: rent.createdAt.toISOString().split('T')[0]
@@ -332,3 +340,59 @@ export const rentHistory = async (req, res, next) => {
     res.status(400).json({ error: "Internal server error" });
   }
 };
+
+//fetch rent due data
+export const rentDueData = async (req, res, next) => {
+  try {
+    const userId = req.user.id
+    const RentData = await RentInfo.find({userId})
+
+    const formattedRentData = RentData.map(rent => ({
+      ...rent.toObject(),
+      rentDate: rent.rentDate.toISOString().split('T')[0],
+      lastDateWithoutFine:rent.lastDateWithoutFine.toISOString().split('T')[0],
+      lastDateWithFine:rent.lastDateWithFine.toISOString().split('T')[0]
+    }));
+    
+    res.status(200).json({data:formattedRentData})
+
+
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server error" })
+  }
+}
+
+
+cron.schedule("0 0 0 1 * *", async function generateMonthlyRent() {
+  try {
+    const users = await Student.find({ role: { $ne: "guest" } });
+    const rentMonth = new Date().toLocaleString("default", { month: "long" });
+    const rentYear = new Date().getFullYear();
+    const rentDues = [];
+
+    for (const user of users) {
+      const room = await HostelRooms.findOne({ _id: user.roomData });
+      const rentAmount = room.room_rent; 
+      const rentDate = new Date(rentYear, new Date().getMonth(), 1);
+      const lastDateWithoutFine = new Date(rentYear, new Date().getMonth(), 5);
+      const lastDateWithFine = new Date(rentYear, new Date().getMonth(), 10);
+
+      rentDues.push({
+        userId: user._id,
+        rentMonth,
+        rentDate,
+        rentAmount,
+        lastDateWithoutFine,
+        lastDateWithFine,
+        fine: 0,
+      });
+    }
+
+    await RentInfo.insertMany(rentDues);
+  } catch (error) {
+    console.error(error);
+  }
+});
+

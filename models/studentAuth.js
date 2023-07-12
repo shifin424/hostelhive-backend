@@ -88,7 +88,7 @@ const studentSchema = new mongoose.Schema(
             default: "guest",
         },
 
-        roomNo: {
+        roomData: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'HostelRooms',
         },

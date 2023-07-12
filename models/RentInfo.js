@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
 const RentSchema = new mongoose.Schema(
     {
-        hostelId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'HostelInfo',
-        },
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Student',

@@ -2,7 +2,8 @@ import express from "express";
 import {
     request, BookingData, fetchPaymentData, payMentDatas,
     paymentVerification, studentComplaint, complaintData,
-    foodMenu, leaveLetter, fetchLeaveData,rentHistory
+    foodMenu, leaveLetter, fetchLeaveData,rentHistory,
+    rentDueData
 } from '../controllers/Student/student.js'
 import VerifyToken from '../middlewares/authorizaion.js'
 
@@ -30,6 +31,8 @@ StudentRouter.post('/add-leave-letter/:id', VerifyToken.verifyTokenStudent, leav
 StudentRouter.get('/fetch-leave-letter/:id', VerifyToken.verifyTokenStudent, fetchLeaveData)
 
 StudentRouter.get('/fetch-rent-history/:id',VerifyToken.verifyTokenStudent,rentHistory)
+
+StudentRouter.get('/fetch-rent-due-data',VerifyToken.verifyTokenStudent,rentDueData)
 
 
 export default StudentRouter;
