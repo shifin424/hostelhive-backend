@@ -7,6 +7,7 @@ import HostelRooms from '../../models/hostelRoom.js';
 import Payment from "../../models/payement.js";
 import Student from "../../models/studentAuth.js";
 import Complaints from '../../models/complaints.js'
+import VacatingLetter from '../../models/vacatingLetter.js'
 import LeaveLetter from '../../models/LeaveLetter.js'
 import dotenv from 'dotenv'
 import jwt from "jsonwebtoken";
@@ -125,10 +126,10 @@ export const payMentDatas = async (req, res, next) => {
   }
 }
 
-// payment conifrimation0
+// payment conifrimation
 export const paymentVerification = async (req, res, next) => {
   try {
-    
+
     const userId = req.user.id;
     const hostelId = req.params.id
     console.log(hostelId, "checking hostel Id");
@@ -178,7 +179,7 @@ export const paymentVerification = async (req, res, next) => {
             student.roomData = roomId;
             student.role = "resident";
             await student.save();
-              
+
             const payload = {
               id: student.id,
               name: student.fullName,
@@ -345,26 +346,129 @@ export const rentHistory = async (req, res, next) => {
 export const rentDueData = async (req, res, next) => {
   try {
     const userId = req.user.id
-    const RentData = await RentInfo.find({userId})
+    const RentData = await RentInfo.find({ userId })
 
     const formattedRentData = RentData.map(rent => ({
       ...rent.toObject(),
       rentDate: rent.rentDate.toISOString().split('T')[0],
-      lastDateWithoutFine:rent.lastDateWithoutFine.toISOString().split('T')[0],
-      lastDateWithFine:rent.lastDateWithFine.toISOString().split('T')[0]
+      lastDateWithoutFine: rent.lastDateWithoutFine.toISOString().split('T')[0],
+      lastDateWithFine: rent.lastDateWithFine.toISOString().split('T')[0]
     }));
-    
-    res.status(200).json({data:formattedRentData})
 
-
-
+    res.status(200).json({ data: formattedRentData })
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server error" })
   }
 }
 
+//post vacating letter
+export const vacatingLetter = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const hostelId = req.params.id;
+    const { date, reason } = req.body.values;
 
+    const rentDate = new Date(
+      Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)
+    );
+    const rentDue = await RentInfo.findOne({
+      user: userId,
+      rentDate,
+      status: "Unpaid",
+    })
+    if (rentDue) {
+      throw new Error("Please pay the rent before vacating.");
+    }
+
+    await VacatingLetter.create(
+      [
+        {
+          hostelId: hostelId,
+          userId: userId,
+          vacatingLetterDate: date,
+          reason: reason,
+        },
+      ],
+    );
+    const user = await Student.findById(userId)
+    const room = await HostelRooms.findOne({ _id: user.roomData })
+
+    room.occupants -= 1;
+    if (room.occupants < room.capacity && room.status === "occupied") {
+      room.status = "vacant";
+    }
+
+    await Promise.all([
+      user.save(),
+      room.save(),
+    ]);
+
+    res.status(200).json({
+      message:
+        "Your vacating letter has been submitted successfully! We hope you had a comfortable and enjoyable stay with us.",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+
+
+// const postVacatingLetter = async (req, res) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+//   try {
+//     const { values, userId } = req.body;
+//     const rentDate = new Date(
+//       Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)
+//     );
+//     const rentDue = await RentDue.findOne({
+//       user: userId,
+//       rentDate,
+//       status: "Unpaid",
+//     }).session(session);
+//     if (rentDue) {
+//       throw new Error("Please pay the rent before vacating.");
+//     }
+//     await VacatingLetter.create([{ ...values, user: userId }], { session });
+//     const user = await User.findById(userId).session(session);
+//     const room = await Room.findOne({ roomNo: user.roomNo }).session(session);
+//     room.occupants -= 1;
+//     if (room.occupants < room.capacity && room.status === "occupied") {
+//       room.status = "available";
+//     }
+//     const roomType = await RoomType.findOneAndUpdate(
+//       { _id: room.roomType, status: "unavailable" },
+//       { $set: { status: "available" } },
+//       {
+//         session,
+//         new: true,
+//       }
+//     );
+//     user.role = "guest";
+//     user.roomNo = undefined;
+//     await Promise.all([user.save({ session }), room.save({ session })]);
+//     await session.commitTransaction();
+//     session.endSession();
+//     res.status(200).json({
+//       message:
+//         "Your vacating letter has been submitted successfully! We hope you had a comfortable and enjoyable stay with us.",
+//     });
+//   } catch (error) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     console.error(error);
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+
+
+
+// generate monthly rent 
 cron.schedule("0 0 0 1 * *", async function generateMonthlyRent() {
   try {
     const users = await Student.find({ role: { $ne: "guest" } });
@@ -374,7 +478,7 @@ cron.schedule("0 0 0 1 * *", async function generateMonthlyRent() {
 
     for (const user of users) {
       const room = await HostelRooms.findOne({ _id: user.roomData });
-      const rentAmount = room.room_rent; 
+      const rentAmount = room.room_rent;
       const rentDate = new Date(rentYear, new Date().getMonth(), 1);
       const lastDateWithoutFine = new Date(rentYear, new Date().getMonth(), 5);
       const lastDateWithFine = new Date(rentYear, new Date().getMonth(), 10);
