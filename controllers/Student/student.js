@@ -140,9 +140,7 @@ export const paymentVerification = async (req, res, next) => {
     });
 
     const { orderId, rentPayment } = req.body;
-    console.log(rentPayment, "checking room data");
     const roomId = rentPayment.room_id;
-    console.log(roomId, "room Id");
 
     const order = await razorpayInstance.orders.fetch(orderId);
 
@@ -154,6 +152,7 @@ export const paymentVerification = async (req, res, next) => {
       const room = await HostelRooms.findById(roomId);
       if (room) {
         room.occupants += 1;
+        room.status = "occupants"
         await room.save();
       }
 
@@ -373,49 +372,47 @@ export const vacatingLetter = async (req, res, next) => {
       Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)
     );
     const rentDue = await RentInfo.findOne({
-      user: userId,
-      rentDate,
-      status: "Unpaid",
-    })
+       userId: userId,
+       status: "Unpaid",
+    });
+
+    console.log(rentDue,"cheching rent due");
     if (rentDue) {
-      throw new Error("Please pay the rent before vacating.");
+      res.status(400).json({error:"Please pay the rent before vacating."})
+    }else{
+
     }
 
-    await VacatingLetter.create(
-      [
-        {
-          hostelId: hostelId,
-          userId: userId,
-          vacatingLetterDate: date,
-          reason: reason,
-        },
-      ],
-    );
-    const user = await Student.findById(userId)
-    const room = await HostelRooms.findOne({ _id: user.roomData })
+    await VacatingLetter.create([
+      {
+        hostelId: hostelId,
+        userId: userId,
+        vacatingLetterDate: date,
+        reason: reason,
+      },
+    ]);
+
+    const user = await Student.findById(userId);
+    const room = await HostelRooms.findOne({ _id: user.roomData });
+
+    user.roomData = null;
+    user.role = "guest";
 
     room.occupants -= 1;
     if (room.occupants < room.capacity && room.status === "occupied") {
       room.status = "vacant";
     }
 
-    await Promise.all([
-      user.save(),
-      room.save(),
-    ]);
+    await Promise.all([user.save(), room.save()]);
 
     res.status(200).json({
       message:
-        "Your vacating letter has been submitted successfully! We hope you had a comfortable and enjoyable stay with us.",
+        "success"
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
-
 
 // const postVacatingLetter = async (req, res) => {
 //   const session = await mongoose.startSession();
@@ -467,7 +464,6 @@ export const vacatingLetter = async (req, res, next) => {
 
 
 
-
 // generate monthly rent 
 cron.schedule("0 0 0 1 * *", async function generateMonthlyRent() {
   try {
@@ -475,14 +471,12 @@ cron.schedule("0 0 0 1 * *", async function generateMonthlyRent() {
     const rentMonth = new Date().toLocaleString("default", { month: "long" });
     const rentYear = new Date().getFullYear();
     const rentDues = [];
-
     for (const user of users) {
       const room = await HostelRooms.findOne({ _id: user.roomData });
       const rentAmount = room.room_rent;
       const rentDate = new Date(rentYear, new Date().getMonth(), 1);
       const lastDateWithoutFine = new Date(rentYear, new Date().getMonth(), 5);
       const lastDateWithFine = new Date(rentYear, new Date().getMonth(), 10);
-
       rentDues.push({
         userId: user._id,
         rentMonth,
@@ -493,7 +487,6 @@ cron.schedule("0 0 0 1 * *", async function generateMonthlyRent() {
         fine: 0,
       });
     }
-
     await RentInfo.insertMany(rentDues);
   } catch (error) {
     console.error(error);
