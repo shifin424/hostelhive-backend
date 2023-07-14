@@ -396,6 +396,7 @@ export const vacatingLetter = async (req, res, next) => {
     const room = await HostelRooms.findOne({ _id: user.roomData });
 
     user.roomData = null;
+    user.hostelId = null;
     user.role = "guest";
 
     room.occupants -= 1;

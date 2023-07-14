@@ -9,6 +9,7 @@ import Student from '../../models/studentAuth.js'
 import Menu from "../../models/menu.js";
 import { sendOtp, verifyOtp } from "../../helpers/twilioOtp.js";
 import Joi from "joi";
+import VacatingLetter from '../../models/vacatingLetter.js'
 import Complaints from "../../models/complaints.js";
 import LeaveLetter from "../../models/LeaveLetter.js";
 
@@ -720,7 +721,7 @@ export const deleteStudent = async (req, res, next) => {
 // fetch complaint data
 export const complaintsData = async (req, res, next) => {
   try {
-  
+
     const hostelId = req.params.id
     const complaintDetails = await Complaints.find({ hostelId }).populate('user', 'fullName').select('_id complaintType complaintDescrption status  createdAt adminResponse complaintDescription')
     const formattedComplaints = complaintDetails.map(complaint => ({
@@ -775,3 +776,25 @@ export const LeaveData = async (req, res, next) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 }
+
+// fetch vacate data
+export const VacateData = async (req, res, next) => {
+  try {
+    const hostelId = req.params.id;
+    const vacattedDatas = await VacatingLetter.find({ hostelId }).populate('userId', 'fullName studentId');
+    const VacateDatas = vacattedDatas.map((vacate) => ({
+      _id: vacate._id,
+      fullName: vacate.userId.fullName,
+      studentId: vacate.userId.studentId,
+      hostelId: vacate.hostelId,
+      userId:vacate.userId._id,
+      vacatingLetterDate: vacate.vacatingLetterDate.toISOString().split('T')[0],
+      reason: vacate.reason,
+    }));
+    res.status(200).json({ VacateDatas });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal server Error' });
+  }
+};
+
