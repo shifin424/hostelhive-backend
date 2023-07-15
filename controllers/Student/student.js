@@ -423,24 +423,24 @@ export const roomReview = async (req, res, next) => {
     const { rating, reviewText } = req.body.values;
     const currentDate = new Date();
 
-    const reviewData = await Review.find({userId,roomId})
+    const reviewData = await Review.find({ userId, roomId })
 
-    if(!reviewData){
-      
-    const review = new Review({
-      userId: userId,
-      roomId:roomId,
-      date: currentDate,
-      rating: rating,
-      description: reviewText,
-    });
+    if (!reviewData) {
 
-    await review.save();
-    res.status(200).json({ message: 'Review stored successfully' });
-  }else{
-    res.status(400).json({error:"Only One review is valid for a user"})
-  }
-    
+      const review = new Review({
+        userId: userId,
+        roomId: roomId,
+        date: currentDate,
+        rating: rating,
+        description: reviewText,
+      });
+
+      await review.save();
+      res.status(200).json({ message: 'Review stored successfully' });
+    } else {
+      res.status(400).json({ error: "Only One review is valid for a user" })
+    }
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -480,7 +480,7 @@ export const profileData = async (req, res, next) => {
       dateOfBirth: dateOfBirthFormatted,
       hostelName: hostelId.hostelName,
       roomNumber: roomData.room_no,
-      dateOfBirth:dateOfBirthFormatted
+      dateOfBirth: dateOfBirthFormatted
     };
 
     res.status(200).json(responseData);
@@ -490,6 +490,56 @@ export const profileData = async (req, res, next) => {
   }
 };
 
+
+// post edit profile
+export const editProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    console.log(req.body);
+    const {
+      fullName,
+      mobile,
+      gender,
+      dateOfBirth,
+      bloodGroup,
+      parentName,
+      parentMobile,
+      houseName,
+      landMark,
+      area,
+      city,
+      country,
+      pincode
+    } = req.body.values;
+    
+
+    const user = await Student.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }else{
+    user.fullName = fullName;
+    user.phone = mobile;
+    user.gender = gender;
+    user.dateOfBirth = dateOfBirth;
+    user.bloodGroup = bloodGroup;
+    user.parentName = parentName;
+    user.parentMobileNumber = parentMobile;
+    user.address.houseName = houseName;
+    user.address.area = area;
+    user.address.landMark = landMark;
+    user.address.city = city;
+    user.address.country = country;
+    user.address.pincode = pincode;
+
+    const updatedUser = await user.save();
+    }
+    res.status(200).json({ message: "Profile updated successfully"});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 
 
