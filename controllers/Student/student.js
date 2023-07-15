@@ -447,6 +447,53 @@ export const roomReview = async (req, res, next) => {
   }
 };
 
+// fetch profile data
+export const profileData = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const studentData = await Student.findById(userId)
+      .populate('hostelId', 'hostelName')
+      .populate('roomData', 'room_no');
+
+    const {
+      address,
+      fullName,
+      email,
+      gender,
+      phone,
+      role,
+      bloodGroup,
+      dateOfBirth,
+      hostelId,
+      roomData,
+    } = studentData;
+
+    const dateOfBirthFormatted = dateOfBirth.toISOString().split('T')[0];
+    const responseData = {
+      address,
+      fullName,
+      email,
+      gender,
+      phone,
+      role,
+      bloodGroup,
+      dateOfBirth: dateOfBirthFormatted,
+      hostelName: hostelId.hostelName,
+      roomNumber: roomData.room_no,
+      dateOfBirth:dateOfBirthFormatted
+    };
+
+    res.status(200).json(responseData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server Error" });
+  }
+};
+
+
+
+
+
 // generate monthly rent 
 cron.schedule("0 0 0 1 * *", async function generateMonthlyRent() {
   try {
