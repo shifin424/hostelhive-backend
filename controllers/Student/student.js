@@ -13,6 +13,7 @@ import dotenv from 'dotenv'
 import jwt from "jsonwebtoken";
 import Razorpay from 'razorpay'
 import Menu from "../../models/menu.js";
+import Review from "../../models/review.js";
 dotenv.config()
 
 
@@ -372,14 +373,14 @@ export const vacatingLetter = async (req, res, next) => {
       Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)
     );
     const rentDue = await RentInfo.findOne({
-       userId: userId,
-       status: "Unpaid",
+      userId: userId,
+      status: "Unpaid",
     });
 
-    console.log(rentDue,"cheching rent due");
+    console.log(rentDue, "cheching rent due");
     if (rentDue) {
-      res.status(400).json({error:"Please pay the rent before vacating."})
-    }else{
+      res.status(400).json({ error: "Please pay the rent before vacating." })
+    } else {
 
     }
 
@@ -403,9 +404,7 @@ export const vacatingLetter = async (req, res, next) => {
     if (room.occupants < room.capacity && room.status === "occupied") {
       room.status = "vacant";
     }
-
     await Promise.all([user.save(), room.save()]);
-
     res.status(200).json({
       message:
         "success"
@@ -415,55 +414,38 @@ export const vacatingLetter = async (req, res, next) => {
   }
 };
 
-// const postVacatingLetter = async (req, res) => {
-//   const session = await mongoose.startSession();
-//   session.startTransaction();
-//   try {
-//     const { values, userId } = req.body;
-//     const rentDate = new Date(
-//       Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)
-//     );
-//     const rentDue = await RentDue.findOne({
-//       user: userId,
-//       rentDate,
-//       status: "Unpaid",
-//     }).session(session);
-//     if (rentDue) {
-//       throw new Error("Please pay the rent before vacating.");
-//     }
-//     await VacatingLetter.create([{ ...values, user: userId }], { session });
-//     const user = await User.findById(userId).session(session);
-//     const room = await Room.findOne({ roomNo: user.roomNo }).session(session);
-//     room.occupants -= 1;
-//     if (room.occupants < room.capacity && room.status === "occupied") {
-//       room.status = "available";
-//     }
-//     const roomType = await RoomType.findOneAndUpdate(
-//       { _id: room.roomType, status: "unavailable" },
-//       { $set: { status: "available" } },
-//       {
-//         session,
-//         new: true,
-//       }
-//     );
-//     user.role = "guest";
-//     user.roomNo = undefined;
-//     await Promise.all([user.save({ session }), room.save({ session })]);
-//     await session.commitTransaction();
-//     session.endSession();
-//     res.status(200).json({
-//       message:
-//         "Your vacating letter has been submitted successfully! We hope you had a comfortable and enjoyable stay with us.",
-//     });
-//   } catch (error) {
-//     await session.abortTransaction();
-//     session.endSession();
-//     console.error(error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
+// add room review
+export const roomReview = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const roomId = req.params.id
+    const { rating, reviewText } = req.body.values;
+    const currentDate = new Date();
 
+    const reviewData = await Review.find({userId,roomId})
+
+    if(!reviewData){
+      
+    const review = new Review({
+      userId: userId,
+      roomId:roomId,
+      date: currentDate,
+      rating: rating,
+      description: reviewText,
+    });
+
+    await review.save();
+    res.status(200).json({ message: 'Review stored successfully' });
+  }else{
+    res.status(400).json({error:"Only One review is valid for a user"})
+  }
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 // generate monthly rent 
 cron.schedule("0 0 0 1 * *", async function generateMonthlyRent() {

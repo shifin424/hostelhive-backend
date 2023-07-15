@@ -3,7 +3,7 @@ import {
     request, BookingData, fetchPaymentData, payMentDatas,
     paymentVerification, studentComplaint, complaintData,
     foodMenu, leaveLetter, fetchLeaveData,rentHistory,
-    rentDueData,vacatingLetter
+    rentDueData,vacatingLetter,roomReview
 } from '../controllers/Student/student.js'
 import VerifyToken from '../middlewares/authorizaion.js'
 
@@ -35,6 +35,8 @@ StudentRouter.get('/fetch-rent-history/:id',VerifyToken.verifyTokenStudent,rentH
 StudentRouter.get('/fetch-rent-due-data',VerifyToken.verifyTokenStudent,rentDueData)
 
 StudentRouter.post('/post-vacating-data/:id',VerifyToken.verifyTokenStudent,vacatingLetter)
+
+StudentRouter.post('/add-room-review/:id',VerifyToken.verifyTokenStudent,roomReview)
 
 
 export default StudentRouter;
