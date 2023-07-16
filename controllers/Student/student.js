@@ -495,7 +495,7 @@ export const profileData = async (req, res, next) => {
 export const editProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    console.log(req.body);
+    console.log(req.body.values);
     const {
       fullName,
       mobile,
@@ -510,36 +510,50 @@ export const editProfile = async (req, res, next) => {
       city,
       country,
       pincode
-    } = req.body.values;
+    } = req.Values;
+
+
     
 
-    const user = await Student.findById(userId);
+    
+    // const user = await Student.findById(userId);
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }else{
-    user.fullName = fullName;
-    user.phone = mobile;
-    user.gender = gender;
-    user.dateOfBirth = dateOfBirth;
-    user.bloodGroup = bloodGroup;
-    user.parentName = parentName;
-    user.parentMobileNumber = parentMobile;
-    user.address.houseName = houseName;
-    user.address.area = area;
-    user.address.landMark = landMark;
-    user.address.city = city;
-    user.address.country = country;
-    user.address.pincode = pincode;
+    // if (!user) {
+    //   return res.status(404).json({ error: "User not found" });
+    // }else{
+    // user.fullName = fullName;
+    // user.phone = mobile;
+    // user.gender = gender;
+    // user.dateOfBirth = dateOfBirth;
+    // user.bloodGroup = bloodGroup;
+    // user.parentName = parentName;
+    // user.parentMobileNumber = parentMobile;
+    // user.address.houseName = houseName;
+    // user.address.area = area;
+    // user.address.landMark = landMark;
+    // user.address.city = city;
+    // user.address.country = country;
+    // user.address.pincode = pincode;
 
-    const updatedUser = await user.save();
-    }
-    res.status(200).json({ message: "Profile updated successfully"});
+    // const updatedUser = await user.save();
+    // }
+    // res.status(200).json({ message: "Profile updated successfully"});
   } catch (error) {
-    console.error(error);
+    console.log(error,"this is the error");
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+// upload profile photo
+export const profileImage = async (req,res,next)=>{
+  try{
+    console.log(req.file,"<<<<<<<<<<<<<<<<<<<<")  
+
+  }catch(error){
+    res.status(500).json({error:"Internal server Error"})
+  }
+}
 
 
 

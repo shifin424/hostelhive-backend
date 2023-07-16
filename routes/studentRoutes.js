@@ -2,11 +2,12 @@ import express from "express";
 import {
     request, BookingData, fetchPaymentData, payMentDatas,
     paymentVerification, studentComplaint, complaintData,
-    foodMenu, leaveLetter, fetchLeaveData,rentHistory,
-    rentDueData,vacatingLetter,roomReview,profileData,
-    editProfile
+    foodMenu, leaveLetter, fetchLeaveData, rentHistory,
+    rentDueData, vacatingLetter, roomReview, profileData,
+    editProfile,profileImage
 } from '../controllers/Student/student.js'
 import VerifyToken from '../middlewares/authorizaion.js'
+import uploadImage from "../config/cloudinary.js";
 
 const StudentRouter = express.Router();
 
@@ -31,17 +32,18 @@ StudentRouter.post('/add-leave-letter/:id', VerifyToken.verifyTokenStudent, leav
 
 StudentRouter.get('/fetch-leave-letter/:id', VerifyToken.verifyTokenStudent, fetchLeaveData)
 
-StudentRouter.get('/fetch-rent-history/:id',VerifyToken.verifyTokenStudent,rentHistory)
+StudentRouter.get('/fetch-rent-history/:id', VerifyToken.verifyTokenStudent, rentHistory)
 
-StudentRouter.get('/fetch-rent-due-data',VerifyToken.verifyTokenStudent,rentDueData)
+StudentRouter.get('/fetch-rent-due-data', VerifyToken.verifyTokenStudent, rentDueData)
 
-StudentRouter.post('/post-vacating-data/:id',VerifyToken.verifyTokenStudent,vacatingLetter)
+StudentRouter.post('/post-vacating-data/:id', VerifyToken.verifyTokenStudent, vacatingLetter)
 
-StudentRouter.post('/add-room-review/:id',VerifyToken.verifyTokenStudent,roomReview)
+StudentRouter.post('/add-room-review/:id', VerifyToken.verifyTokenStudent, roomReview)
 
-StudentRouter.get('/fetch-profile-data',VerifyToken.verifyTokenStudent,profileData)
+StudentRouter.get('/fetch-profile-data', VerifyToken.verifyTokenStudent, profileData)
 
-StudentRouter.post('/post-edit-profile',VerifyToken.verifyTokenStudent,editProfile)
+StudentRouter.post('/post-edit-profile', VerifyToken.verifyTokenStudent, editProfile)
 
+StudentRouter.patch('/upload-image',VerifyToken.verifyTokenStudent,uploadImage,profileImage)
 
 export default StudentRouter;
