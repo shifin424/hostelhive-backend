@@ -153,7 +153,7 @@ export const paymentVerification = async (req, res, next) => {
       const room = await HostelRooms.findById(roomId);
       if (room) {
         room.occupants += 1;
-        room.status = "occupants"
+        room.status = "occupied"
         await room.save();
       }
 
@@ -466,6 +466,9 @@ export const profileData = async (req, res, next) => {
       dateOfBirth,
       hostelId,
       roomData,
+      parentName,
+      parentMobileNumebr,
+      studentImage,
     } = studentData;
 
     const dateOfBirthFormatted = dateOfBirth.toISOString().split('T')[0];
@@ -477,6 +480,9 @@ export const profileData = async (req, res, next) => {
       phone,
       role,
       bloodGroup,
+      parentName,
+      parentMobileNumebr,
+      studentImage,
       dateOfBirth: dateOfBirthFormatted,
       hostelName: hostelId.hostelName,
       roomNumber: roomData.room_no,
@@ -495,7 +501,7 @@ export const profileData = async (req, res, next) => {
 export const editProfile = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    console.log(req.body.values);
+    console.log(req.body);
     const {
       fullName,
       mobile,
@@ -510,12 +516,12 @@ export const editProfile = async (req, res, next) => {
       city,
       country,
       pincode
-    } = req.Values;
+    } = req.body;
 
 
     
 
-    
+
     // const user = await Student.findById(userId);
 
     // if (!user) {
@@ -546,16 +552,27 @@ export const editProfile = async (req, res, next) => {
 
 
 // upload profile photo
-export const profileImage = async (req,res,next)=>{
-  try{
-    console.log(req.file,"<<<<<<<<<<<<<<<<<<<<")  
+export const profileImage = async (req, res, next) => {
+  try {
+    const { path, filename } = req.file;
+    const studentId = req.user.id;
 
-  }catch(error){
-    res.status(500).json({error:"Internal server Error"})
+    const studentData = await Student.findOneAndUpdate(
+      { _id: studentId },
+      {
+        $set: {
+          'studentImage.public_id': filename,
+          'studentImage.url': path,
+        },
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ studentData });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server Error" });
   }
-}
-
-
+};
 
 
 // generate monthly rent 

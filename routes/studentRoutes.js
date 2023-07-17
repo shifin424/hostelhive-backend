@@ -42,7 +42,7 @@ StudentRouter.post('/add-room-review/:id', VerifyToken.verifyTokenStudent, roomR
 
 StudentRouter.get('/fetch-profile-data', VerifyToken.verifyTokenStudent, profileData)
 
-StudentRouter.post('/post-edit-profile', VerifyToken.verifyTokenStudent, editProfile)
+StudentRouter.put('/edit-profile', VerifyToken.verifyTokenStudent, editProfile)
 
 StudentRouter.patch('/upload-image',VerifyToken.verifyTokenStudent,uploadImage,profileImage)
 

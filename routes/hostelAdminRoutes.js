@@ -4,7 +4,7 @@ import {
     fetchRoomData, studentRequestData, complaintsData, approval, rejected,
     editMenu, fetchFoodData, StudentData, blockStudent, unblockStudent,
     deleteStudent, addFoodMenu, editRoomData, LeaveData, editComplaint,
-    VacateData
+    VacateData,fetchStudentRequest
 } from '../controllers/Hostel/hostelAdmin.js';
 import uploadImage from '../config/cloudinary.js'
 import veryfyToken from '../middlewares/authorizaion.js'
@@ -55,6 +55,8 @@ hosteladminRouter.patch('/edit-complaints-data/:id', veryfyToken.verifyTokenHost
 hosteladminRouter.get('/fetch-leave-data/:id', veryfyToken.verifyTokenHostelAdmin, LeaveData)
 
 hosteladminRouter.get('/fetch-vacate-letters/:id',veryfyToken.verifyTokenHostelAdmin,VacateData)
+
+hosteladminRouter.get('/fetch-request-data',veryfyToken.verifyTokenHostelAdmin,fetchStudentRequest)
 
 
 export default hosteladminRouter;

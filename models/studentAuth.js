@@ -33,6 +33,16 @@ const studentSchema = new mongoose.Schema(
             type:Boolean,
             default:false
         },
+        studentImage: {
+            public_id: {
+              type: String,
+              required: true
+            },
+            url: {
+              type: String,
+              required: true
+            },
+          },
         parentName: {
             type: String,
         },

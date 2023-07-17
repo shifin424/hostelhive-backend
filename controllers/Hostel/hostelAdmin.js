@@ -798,3 +798,20 @@ export const VacateData = async (req, res, next) => {
   }
 };
 
+
+
+export const fetchStudentRequest = async (req, res, next) => {
+  try {
+    const requestData = await Student.find({
+      isRequested: true,
+      isVerified: false,
+      rejectedReason: 'none'
+    })
+      .populate('hostelId', 'hostelName'); 
+
+    console.log(requestData);
+    res.status(200).json({ requestData });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
