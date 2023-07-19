@@ -4,7 +4,8 @@ import {
     fetchRoomData, studentRequestData, complaintsData, approval, rejected,
     editMenu, fetchFoodData, StudentData, blockStudent, unblockStudent,
     deleteStudent, addFoodMenu, editRoomData, LeaveData, editComplaint,
-    VacateData,fetchStudentRequest,getDashboardData
+    VacateData,fetchStudentRequest,getDashboardData,getDashboardCount,
+    getGlobalCount,getGlobalChart
 } from '../controllers/Hostel/hostelAdmin.js';
 import uploadImage from '../config/cloudinary.js'
 import veryfyToken from '../middlewares/authorizaion.js'
@@ -59,6 +60,12 @@ hosteladminRouter.get('/fetch-vacate-letters/:id',veryfyToken.verifyTokenHostelA
 hosteladminRouter.get('/fetch-request-data',veryfyToken.verifyTokenHostelAdmin,fetchStudentRequest)
 
 hosteladminRouter.get('/fetch-dashboard-data/:id',veryfyToken.verifyTokenHostelAdmin,getDashboardData)
+
+hosteladminRouter.get('/fetch-dashboard-count/:id',veryfyToken.verifyTokenHostelAdmin,getDashboardCount)
+
+hosteladminRouter.get('/fetch-global-count',veryfyToken.verifyTokenHostelAdmin,getGlobalCount)
+
+hosteladminRouter.get('/fetch-global-chart',veryfyToken.verifyTokenHostelAdmin,getGlobalChart)
 
 
 export default hosteladminRouter;
