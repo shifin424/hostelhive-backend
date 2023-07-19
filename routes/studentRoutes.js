@@ -4,7 +4,7 @@ import {
     paymentVerification, studentComplaint, complaintData,
     foodMenu, leaveLetter, fetchLeaveData, rentHistory,
     rentDueData, vacatingLetter, roomReview, profileData,
-    editProfile,profileImage
+    editProfile,profileImage,changePassword
 } from '../controllers/Student/student.js'
 import VerifyToken from '../middlewares/authorizaion.js'
 import uploadImage from "../config/cloudinary.js";
@@ -45,5 +45,7 @@ StudentRouter.get('/fetch-profile-data', VerifyToken.verifyTokenStudent, profile
 StudentRouter.put('/edit-profile', VerifyToken.verifyTokenStudent, editProfile)
 
 StudentRouter.patch('/upload-image',VerifyToken.verifyTokenStudent,uploadImage,profileImage)
+
+StudentRouter.patch('/change-password',VerifyToken.verifyTokenStudent,changePassword)
 
 export default StudentRouter;

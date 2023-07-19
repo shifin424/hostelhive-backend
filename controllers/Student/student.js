@@ -11,6 +11,7 @@ import VacatingLetter from '../../models/vacatingLetter.js'
 import LeaveLetter from '../../models/LeaveLetter.js'
 import dotenv from 'dotenv'
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import Razorpay from 'razorpay'
 import Menu from "../../models/menu.js";
 import Review from "../../models/review.js";
@@ -569,6 +570,46 @@ export const profileImage = async (req, res, next) => {
     res.status(500).json({ error: "Internal server Error" });
   }
 };
+
+
+// change password data
+
+export const changePassword = async (req,res,next)=>{
+  try{
+    const userId = req.user.id
+    const currentPassword = req.body.currentPassword;
+    const newPassword = req.body.newPassword;
+    const confirmPassword = req.body.confirmPassword;
+
+    const studentData = await Student.findById(userId)
+
+    if (!studentData) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const isPasswordValid = await bcrypt.compare(currentPassword, studentData.password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: 'Invalid current password' });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: 'New password and confirm password do not match' });
+    }
+
+    const saltRounds = 10;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+
+    studentData.password = hashedNewPassword;
+    await studentData.save();
+
+    res.status(200).json({message:"Successully updated your password"})
+
+  }catch(error){
+    res.status(error).json({error:"Internal server error"})
+  }
+}
+
 
 
 // generate monthly rent 
