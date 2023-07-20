@@ -32,7 +32,6 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 const uploadImage = (req, res, next) => {
 
-console.log(req.file,"helo<<<<<<<<<<<<<<<")
 
   upload.single('image')(req, res, (err) => {
     if (err) {
@@ -42,10 +41,6 @@ console.log(req.file,"helo<<<<<<<<<<<<<<<")
       }
       return res.status(500).json({ error: 'An error occurred during file upload' });
     }else{
-      console.log(req.file,"file<<<<<<<<<<<<<<<")
-      console.log(req.files,"files<<<<<<<<<<<<<<<")
-      console.log(req.body,"body<<<<<<<<<<<<<<<")
-
       console.log("reached to cloudinary")
      return next();
     }
