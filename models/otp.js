@@ -13,7 +13,8 @@ const otpSchema = new mongoose.Schema(
 
     },
     {
-        timestamps: true
+        timestamps: true,
+        expires: 180,
     }
 );
 const Otp =  mongoose.model('Otp',otpSchema)

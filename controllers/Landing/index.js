@@ -6,6 +6,8 @@ import bcrypt from "bcryptjs";
 import Joi from 'joi';
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv'
+import {sendMail} from '../../helpers/mailer.js'
+import Otp from "../../models/otp.js";
 
 
 dotenv.config()
@@ -139,7 +141,6 @@ export const signup = async (req, res, next) => {
     });
 
     const { error } = schema.validate({ fullName, email, phone, gender, password, confirmPassword }, { abortEarly: true });
-
     if (error) {
       const errors = error.details.map((detail) => ({
         field: detail.path[0],
@@ -147,7 +148,6 @@ export const signup = async (req, res, next) => {
       }));
       return res.status(400).json({ errors });
     }
-
     const isExist = await Student.findOne({
       $or: [
         { fullname: fullName },
@@ -155,10 +155,11 @@ export const signup = async (req, res, next) => {
         { email: email }
       ]
     });
-
     if (isExist) {
       res.status(400).json({ message: "User with this name, phone, or email already exists" });
     }
+  
+     await sendMail(email,fullName)
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -180,7 +181,8 @@ export const signup = async (req, res, next) => {
 // otp data 
 export const OtpVerification = async (req, res, next) => {
   try {
-    const { fullName, email, phone, gender, password } = req.body
+    const { fullName, email, phone, gender, password ,otp} = req.body
+    console.log(fullName,email,phone,gender,password,otp);
     const schema = Joi.object({
       fullName: Joi.string().required().messages({
         'any.required': 'fullName is required',
@@ -219,15 +221,26 @@ export const OtpVerification = async (req, res, next) => {
       return res.status(400).json({ errors });
     }
 
+      if (!/^\d{6}$/.test(otp)) {
+      return res.status(400).json({ message: 'Invalid OTP format' });
+    }
+
+    const existingOtp = await Otp.findOne({ email, otp });
+    if (!existingOtp) {
+      return res.status(400).json({message: 'Invalid email or OTP' });
+    }
+
     const StudentAuth = await Student.create({
       fullName,
-      email, 
+      email,
       phone,
       password,
       gender,
     });
 
-    res.status(200).json({ message: "success" })
+    await Otp.deleteOne({ email });
+
+    res.status(200).json({ message: 'success' });
   } catch (err) {
     console.log(err);
   }
