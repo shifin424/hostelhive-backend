@@ -456,6 +456,8 @@ export const profileData = async (req, res, next) => {
       .populate('hostelId', 'hostelName')
       .populate('roomData', 'room_no');
 
+      console.log(studentData);
+
     const {
       address,
       fullName,

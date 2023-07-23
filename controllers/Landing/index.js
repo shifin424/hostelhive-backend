@@ -222,12 +222,12 @@ export const OtpVerification = async (req, res, next) => {
     }
 
       if (!/^\d{6}$/.test(otp)) {
-      return res.status(400).json({ message: 'Invalid OTP format' });
+       res.status(400).json({ message: 'Invalid OTP format' });
     }
 
     const existingOtp = await Otp.findOne({ email, otp });
     if (!existingOtp) {
-      return res.status(400).json({message: 'Invalid email or OTP' });
+       res.status(400).json({message: 'Invalid email or OTP' });
     }
 
     const StudentAuth = await Student.create({
