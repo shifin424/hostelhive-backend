@@ -5,8 +5,7 @@ dotenv.config();
 
 const verifyTokenSuperAdmin = (req, res, next) => {
     const token = req.headers.authorization;
-    console.log(token, "===");
-
+   
     if (!token) {
         const error = new Error('No token provided');
         error.statusCode = 401;
@@ -35,7 +34,7 @@ const verifyTokenHostelAdmin = (req, res, next) => {
 
 
     const token = req.headers.authorization
-    console.log(token,"backedn token");
+   
     if (!token) {
         const error = new Error('No token provided');
         error.statusCode = 401;

@@ -538,7 +538,7 @@ export const editProfile = async (req, res, next) => {
     user.address.country = country;
     user.address.pincode = pincode;
 
-    const updatedUser = await user.save();
+     await user.save();
     }
     res.status(200).json({ message: "Profile updated successfully"});
   } catch (error) {

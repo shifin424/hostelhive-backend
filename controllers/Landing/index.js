@@ -221,7 +221,7 @@ export const OtpVerification = async (req, res, next) => {
 
     const StudentAuth = await Student.create({
       fullName,
-      email,
+      email, 
       phone,
       password,
       gender,
@@ -254,7 +254,7 @@ export const login = async (req, res, next) => {
         };
 
         const token = jwt.sign(payload, process.env.USER_SECRET_KEY, {
-          expiresIn: "3d",
+          expiresIn: "7d",
         });
 
         res.json({

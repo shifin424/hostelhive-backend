@@ -115,10 +115,10 @@ export const signUp = async (req, res, next) => {
         .json({ message: "User with this mobile number already exists" });
     }
 
-    // const otpSend = await sendOtp(mobileNumber);
-    // if (!otpSend) {
-    //   return res.status(500).json({ error: "Failed to send OTP" });
-    // }
+    const otpSend = await sendOtp(mobileNumber);
+    if (!otpSend) {
+      return res.status(500).json({ error: "Failed to send OTP" });
+    }
 
     const token = jwt.sign(
       { email, mobileNumber },
@@ -170,9 +170,8 @@ export const otpVerification = async (req, res) => {
       });
     }
 
-    //const otpVerify = await verifyOtp(mobileNumber, otpCode);
-    // if (otpVerify.status == "approved") {
-    if (otpCode) {
+    const otpVerify = await verifyOtp(mobileNumber, otpCode);
+    if (otpVerify.status == "approved") {
       const adminExistsByEmail = await HostelAdmin.findOne({ email });
       if (adminExistsByEmail) {
         return res
@@ -243,7 +242,7 @@ export const login = async (req, res) => {
           fullName: admin.fullName,
         };
         const token = jwt.sign(payload, process.env.JWT_SECRET, {
-          expiresIn: "3d",
+          expiresIn: "7d",
         });
 
         res.json({
@@ -458,11 +457,14 @@ export const roomData = async (req, res, next) => {
 // hostel edit room data
 export const editRoomData = async (req, res, next) => {
   try {
-    const hostelId = req.params.id
-    const hostel = await HostelInfo.findById(hostelId).populate('rooms');
-    const rooms = hostel.rooms;
-
-    res.status(200).json({ data: rooms })
+    const roomId = req.params.id
+    const roomData = await HostelRooms.findById(roomId)
+    if (!roomData) {
+      res.status(400).json({ message: "NO Room Fount" })
+    }
+    else {
+      res.status(200).json({ roomData })
+    }
 
   } catch (error) {
     res.status(500).json("Internal Server Error")
@@ -1242,9 +1244,62 @@ export const getGlobalChart = async (req, res, next) => {
     const paymentChart = await Payment.aggregate(pipeLine);
     const vacateChart = await Vacate.aggregate(pipeLine)
 
-    res.status(200).json({userChart,hostelChart,paymentChart,vacateChart})
+    res.status(200).json({ userChart, hostelChart, paymentChart, vacateChart })
 
   } catch (error) {
     res.status(500).json({ error: "Internal server error" })
+  }
+}
+
+
+// edit room data
+export const updateRoomData = async (req, res, next) => {
+  try {
+
+    const roomId = req.params.id
+    const { roomNo, roomType, capacity, status, roomPrice, roomTitle, description } = req.body
+
+    const roomData = await HostelRooms.findById(roomId)
+    console.log(roomData);
+    if (!roomData) {
+      res.status(400).json({ message: "Room Does not exist" })
+    }
+    else {
+
+      roomData.room_no = roomNo,
+        roomData.room_type = roomType,
+        roomData.capacity = capacity,
+        roomData.status = status,
+        roomData.room_rent = roomPrice,
+        roomData.title = roomTitle,
+        roomData.description = description
+
+      await roomData.save()
+      res.status(200).json({ message: "Successfully updated Room Details" })
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: "Internal server error" })
+  }
+}
+
+// room image edit
+export const editRoomImage = async (req, res, next) => {
+  try {
+    const roomId = req?.params.id
+    const  {path,filename} = req?.file
+    const roomData = await HostelRooms.findById(roomId)
+    if(!roomData){
+      res.status(400).json({error:"Room Does not exist"})
+    }else{
+      roomData.room_image.url = path,
+      roomData.room_image.public_id = filename
+      await roomData.save()
+      res.status(200).json({message:"Successfully updated Room Image"})
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: "Internal server error" })
   }
 }

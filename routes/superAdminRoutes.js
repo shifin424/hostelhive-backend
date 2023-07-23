@@ -1,7 +1,8 @@
 import express from 'express';
 import {
     login, requests, approval, rejected,
-    hostelData, blockHostel, unblockHostel
+    hostelData, blockHostel, unblockHostel,
+    adminDashboard,adminChartData
 } from '../controllers/Admin/superAdmin.js';
 import verifyToken from '../middlewares/authorizaion.js'
 
@@ -20,6 +21,12 @@ superadminRouter.get('/fetchHostelData', verifyToken.verifyTokenSuperAdmin, host
 superadminRouter.patch('/block-hostel/:id/:adminId', verifyToken.verifyTokenSuperAdmin, blockHostel)
 
 superadminRouter.patch('/unblock-hostel/:id/:adminId', verifyToken.verifyTokenSuperAdmin, unblockHostel)
+
+superadminRouter.get('/fetch-admin-dashboard',verifyToken.verifyTokenSuperAdmin,adminDashboard)
+
+superadminRouter.get('/fetch-chart-data',verifyToken.verifyTokenSuperAdmin,adminChartData)
+
+
 
 
 export default superadminRouter;
