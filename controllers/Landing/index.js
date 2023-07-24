@@ -156,7 +156,7 @@ export const signup = async (req, res, next) => {
       ]
     });
     if (isExist) {
-      res.status(400).json({ message: "User with this name, phone, or email already exists" });
+    return  res.status(400).json({ message: "User with this name, phone, or email already exists" });
     }
   
      await sendMail(email,fullName)
@@ -222,12 +222,12 @@ export const OtpVerification = async (req, res, next) => {
     }
 
       if (!/^\d{6}$/.test(otp)) {
-       res.status(400).json({ message: 'Invalid OTP format' });
+       res.status(400).json({ error: 'Invalid OTP format' });
     }
 
     const existingOtp = await Otp.findOne({ email, otp });
     if (!existingOtp) {
-       res.status(400).json({message: 'Invalid email or OTP' });
+       res.status(400).json({error: 'Invalid email or OTP' });
     }
 
     const StudentAuth = await Student.create({

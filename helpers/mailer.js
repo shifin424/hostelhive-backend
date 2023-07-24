@@ -6,6 +6,7 @@ dotenv.config()
 
 export async function sendMail(email, fullName) {
     const OTP = `${Math.floor(100000 + Math.random() * 900000)}`;
+    console.log(OTP);
     try {
       const otpData = { email, otp: OTP };
       const existingOtpDoc = await Otp.findOne({ email });
@@ -32,8 +33,10 @@ export async function sendMail(email, fullName) {
           <p>HostelHive Team</p>
         </div>`,
       };
+     
   
       const info = await transporter.sendMail(mailData);
+      console.log(info)
     } catch (err) {
       console.log(err, "mailer error");
     }
