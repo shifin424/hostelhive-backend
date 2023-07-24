@@ -18,7 +18,7 @@ export async function sendMail(email, fullName) {
       await newOtpDoc.save();
   
       const mailData = {
-        from: 'hostelhive242@gmail.com',
+        from: process.env.MAILER_EMAIL,
         to: email,
         subject: "Here is the OTP for registering with our HostelHive",
         text: `Dear ${fullName},\n\nYour One-Time Password (OTP) for registration is: ${OTP}\n\nPlease enter this OTP to complete your registration. This OTP is valid for 3 minutes.\n\nThank you,\nHostelHive Team`,
