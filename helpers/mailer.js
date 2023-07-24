@@ -34,9 +34,7 @@ export async function sendMail(email, fullName) {
       };
   
       const info = await transporter.sendMail(mailData);
-      console.log(info);
     } catch (err) {
       console.log(err, "mailer error");
-      throw err;
     }
   }
