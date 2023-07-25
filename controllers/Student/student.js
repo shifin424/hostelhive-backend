@@ -487,7 +487,7 @@ export const profileData = async (req, res, next) => {
       studentImage,
       dateOfBirth: dateOfBirthFormatted,
       hostelName: hostelId.hostelName,
-      roomNumber: roomData.room_no,
+      roomNumber: roomData?.room_no,
       dateOfBirth: dateOfBirthFormatted
     };
 
