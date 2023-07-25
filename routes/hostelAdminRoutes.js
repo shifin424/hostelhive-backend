@@ -5,7 +5,8 @@ import {
     editMenu, fetchFoodData, StudentData, blockStudent, unblockStudent,
     deleteStudent, addFoodMenu, editRoomData, LeaveData, editComplaint,
     VacateData,fetchStudentRequest,getDashboardData,getDashboardCount,
-    getGlobalCount,getGlobalChart,updateRoomData,editRoomImage
+    getGlobalCount,getGlobalChart,updateRoomData,editRoomImage,
+    profileData
 } from '../controllers/Hostel/hostelAdmin.js';
 import uploadImage from '../config/cloudinary.js'
 import veryfyToken from '../middlewares/authorizaion.js'
@@ -70,6 +71,8 @@ hosteladminRouter.get('/fetch-global-chart',veryfyToken.verifyTokenHostelAdmin,g
 hosteladminRouter.put('/update-room-data/:id',veryfyToken.verifyTokenHostelAdmin,updateRoomData)
 
 hosteladminRouter.patch('/fetch-room-image/:id',veryfyToken.verifyTokenHostelAdmin,uploadImage,editRoomImage)
+
+hosteladminRouter.get('/fetch-profile-data/:id',veryfyToken.verifyTokenHostelAdmin,profileData)
 
 
 export default hosteladminRouter;

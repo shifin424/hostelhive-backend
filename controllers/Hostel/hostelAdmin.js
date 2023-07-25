@@ -1303,3 +1303,42 @@ export const editRoomImage = async (req, res, next) => {
     res.status(400).json({ error: "Internal server error" })
   }
 }
+
+
+//fetch profile data
+export const profileData = async (req, res, next) => {
+  try {
+    console.log(req.params.id);
+    const hostelId = req.params.id;
+    const adminData = req.user.id; 
+
+    const hostelInfo = await HostelInfo.findOne(
+      { _id: hostelId, adminData },
+      'admissionFees hostelName hostelType location description hostelImage'
+    ).populate({
+      path: 'adminData',
+      select: 'fullName email mobile',
+    });
+
+    if (!hostelInfo) {
+      return res.status(404).json({ error: 'Hostel not found or you are not the owner' });
+    }
+
+    const profileData = {
+      adminName: hostelInfo.adminData.fullName,
+      email: hostelInfo.adminData.email,
+      hostelFee: hostelInfo.admissionFees,
+      hostelType: hostelInfo.hostelType,
+      adminMobile: hostelInfo.adminData.mobile,
+      location: hostelInfo.location,
+      description: hostelInfo.description,
+      hostelImage: hostelInfo.hostelImage.url, 
+      hostelName:hostelInfo.hostelName
+    };
+
+    res.json(profileData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
