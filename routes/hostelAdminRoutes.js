@@ -29,7 +29,7 @@ hosteladminRouter.get('/room-data/:id', veryfyToken.verifyTokenHostelAdmin, fetc
 
 hosteladminRouter.get('/edit-room-data/:id', veryfyToken.verifyTokenHostelAdmin, editRoomData)
 
-hosteladminRouter.get('/fetchRequestData/:id', veryfyToken.verifyTokenHostelAdmin, studentRequestData)
+hosteladminRouter.get('/fetch-request-data/:id', veryfyToken.verifyTokenHostelAdmin, studentRequestData)
 
 hosteladminRouter.patch('/student-approval/:id', veryfyToken.verifyTokenHostelAdmin, approval)
 

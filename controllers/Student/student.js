@@ -69,11 +69,11 @@ export const request = async (req, res, next) => {
 export const BookingData = async (req, res, next) => {
   try {
     const studentId = req.user.id
-    const bookingStatus = await Students.find({ _id: studentId }).select('isRequested isVerified hostelId')
+    const bookingStatus = await Students.findOne({ _id: studentId }).select('isRequested isVerified hostelId')
 
     res.status(200).json({ bookingStatus })
   } catch (err) {
-    res.status(400).json({ error: "Internal Server Error" })
+    res.status(500).json({ error: "Internal Server Error" })
   }
 }
 
@@ -131,7 +131,6 @@ export const payMentDatas = async (req, res, next) => {
 // payment conifrimation
 export const paymentVerification = async (req, res, next) => {
   try {
-
     const userId = req.user.id;
     const hostelId = req.params.id
     console.log(hostelId, "checking hostel Id");
