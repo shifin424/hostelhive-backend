@@ -1342,3 +1342,53 @@ export const profileData = async (req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+//edit Profile Data 
+export const editProfileData = async (req, res, next) => {
+  try {
+    const hostelId = req.params.id;
+    console.log(hostelId, "<<<<hostel Id");
+    const adminId = req.user.id;
+
+
+    const {
+      adminName,
+      email,
+      hostelFee,
+      hostelType,
+      adminMobile,
+      location,
+      description,
+      hostelName,
+    } = req.body.values;
+
+    const updatedHostelInfo = await HostelInfo.findOneAndUpdate(
+      { _id: hostelId },
+      {
+        adminData: adminId,
+        hostelName: hostelName,
+        location: location,
+        description: description,
+        hostelType: hostelType,
+        admissionFees: hostelFee,
+      },
+      { new: true } 
+    );
+
+    const updatedHostelAdmin = await HostelAdmin.findOneAndUpdate(
+      { _id: adminId },
+      {
+        fullName: adminName,
+        email: email,
+        mobile: adminMobile,
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Success" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server error" });
+  }
+};
