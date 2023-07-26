@@ -1392,3 +1392,26 @@ export const editProfileData = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server error" });
   }
 };
+
+//update profile image
+export const editImage = async (req,res,next)=>{
+  try{
+    const hostelId = req.params.id
+    const {filename,path } = req.file
+
+    const hostelData = await HostelInfo.findByIdAndUpdate(
+      { _id: hostelId },
+      {
+        $set: {
+          'hostelImage.public_id': filename,
+          'hostelImage.url': path,
+        },
+      },
+      { new: true }
+    )
+    res.status(200).json({ hostelData });
+   
+  }catch(error){
+    res.status(500).json("internal server error")
+  }
+}
