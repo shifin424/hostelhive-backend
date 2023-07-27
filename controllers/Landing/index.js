@@ -220,7 +220,6 @@ export const OtpVerification = async (req, res, next) => {
       }));
       return res.status(400).json({ errors });
     }
-
       if (!/^\d{6}$/.test(otp)) {
        res.status(400).json({ error: 'Invalid OTP format' });
     }
