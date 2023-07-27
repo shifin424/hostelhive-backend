@@ -275,7 +275,10 @@ export const addHostel = async (req, res, next) => {
       latitude,
       longitude,
     } = req.body;
+    console.log(req.body);
+    console.log(req.file)
     const { path, filename } = req.file;
+    
 
     if (
       !title ||
@@ -1103,144 +1106,290 @@ export const getDashboardCount = async (req, res, next) => {
 
 export const getGlobalCount = async (req, res, next) => {
   try {
-    const studentCount = await Student.find().count()
-    const vacateCount = await Vacate.find().count()
-    const paymentCount = await Payment.find().count()
-    const hostelCount = await HostelInfo.find().count()
+    const adminId = req.user.id;
 
-    res.status(200).json({ studentCount, vacateCount, paymentCount, hostelCount })
+    let hostelIds = await HostelAdmin.findById(adminId, { hosteldata: 1 });
+    hostelIds = hostelIds.hosteldata.map((hostel) => {
+      return hostel.hostelId;
+    });
+    console.log(hostelIds);
 
+    const studentCount = await Student.find({
+      hostelId: { $in: hostelIds }, 
+    }).count();
+    const vacateCount = await Vacate.find().count();
+    const paymentCount = await Payment.find({
+      hostelId: { $in: hostelIds }, 
+    }).count();
+    console.log(paymentCount);
+
+    const hostelCount = await HostelInfo.find({ adminData: adminId }).count();
+
+    res.status(200).json({ studentCount, vacateCount, paymentCount, hostelCount });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" })
+    res.status(500).json({ error: "Internal server error" });
   }
-}
+};
+
 
 export const getGlobalChart = async (req, res, next) => {
   try {
 
-    const FIRST_MONTH = 1
-    const LAST_MONTH = 12
-    const TODAY = new Date()
-    const YEAR_BEFORE = new Date(TODAY)
-    YEAR_BEFORE.setFullYear(YEAR_BEFORE.getFullYear() - 1)
-    console.log(TODAY, YEAR_BEFORE)
-    const MONTHS_ARRAY = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    const pipeLine = [{
-      $match: {
-        createdAt: { $gte: YEAR_BEFORE, $lte: TODAY }
-      }
-    },
-    {
-      $group: {
-        _id: { year_month: { $substrCP: ["$createdAt", 0, 7] } },
-        count: { $sum: 1 }
-      }
-    },
-    {
-      $sort: { "_id.year_month": 1 }
-    },
-    {
-      $project: {
-        _id: 0,
-        count: 1,
-        month_year: {
-          $concat: [
-            { $arrayElemAt: [MONTHS_ARRAY, { $subtract: [{ $toInt: { $substrCP: ["$_id.year_month", 5, 2] } }, 1] }] },
-            "-",
-            { $substrCP: ["$_id.year_month", 0, 4] }
-          ]
+    const adminId = req.user.id;
+    
+
+    const FIRST_MONTH = 1;
+    const LAST_MONTH = 12;
+    const TODAY = new Date();
+    const YEAR_BEFORE = new Date(TODAY);
+    YEAR_BEFORE.setFullYear(YEAR_BEFORE.getFullYear() - 1);
+    console.log(TODAY, YEAR_BEFORE);
+    const MONTHS_ARRAY = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const pipeLine = [
+      {
+        $match: {
+          createdAt: { $gte: YEAR_BEFORE, $lte: TODAY }
         }
-      }
-    },
-    {
-      $group: {
-        _id: null,
-        data: { $push: { k: "$month_year", v: "$count" } }
-      }
-    },
-    {
-      $addFields: {
-        start_year: { $substrCP: [YEAR_BEFORE, 0, 4] },
-        end_year: { $substrCP: [TODAY, 0, 4] },
-        months1: { $range: [{ $toInt: { $substrCP: [YEAR_BEFORE, 5, 2] } }, { $add: [LAST_MONTH, 1] }] },
-        months2: { $range: [FIRST_MONTH, { $add: [{ $toInt: { $substrCP: [TODAY, 5, 2] } }, 1] }] }
-      }
-    },
-    {
-      $addFields: {
-        template_data: {
-          $concatArrays: [
-            {
-              $map: {
-                input: "$months1",
-                as: "m1",
-                in: {
-                  count: 0,
-                  month_year: {
-                    $concat: [
-                      { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ["$$m1", 1] }] },
-                      "-",
-                      "$start_year"
-                    ]
-                  }
-                }
-              }
-            },
-            {
-              $map: {
-                input: "$months2",
-                as: "m2",
-                in: {
-                  count: 0,
-                  month_year: {
-                    $concat: [
-                      { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ["$$m2", 1] }] },
-                      "-",
-                      "$end_year"
-                    ]
-                  }
-                }
-              }
-            }
-          ]
+      },
+      {
+        $group: {
+          _id: { year_month: { $substrCP: ['$createdAt', 0, 7] } },
+          count: { $sum: 1 }
         }
-      }
-    },
-    {
-      $addFields: {
-        data: {
-          $map: {
-            input: "$template_data",
-            as: "t",
-            in: {
-              k: "$$t.month_year",
-              v: {
-                $reduce: {
-                  input: "$data",
-                  initialValue: 0,
+      },
+      {
+        $sort: { '_id.year_month': 1 }
+      },
+      {
+        $project: {
+          _id: 0,
+          count: 1,
+          month_year: {
+            $concat: [
+              { $arrayElemAt: [MONTHS_ARRAY, { $subtract: [{ $toInt: { $substrCP: ['$_id.year_month', 5, 2] } }, 1] }] },
+              '-',
+              { $substrCP: ['$_id.year_month', 0, 4] }
+            ]
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          data: { $push: { k: '$month_year', v: '$count' } }
+        }
+      },
+      {
+        $addFields: {
+          start_year: { $substrCP: [YEAR_BEFORE, 0, 4] },
+          end_year: { $substrCP: [TODAY, 0, 4] },
+          months1: { $range: [{ $toInt: { $substrCP: [YEAR_BEFORE, 5, 2] } }, { $add: [LAST_MONTH, 1] }] },
+          months2: { $range: [FIRST_MONTH, { $add: [{ $toInt: { $substrCP: [TODAY, 5, 2] } }, 1] }] }
+        }
+      },
+      {
+        $addFields: {
+          template_data: {
+            $concatArrays: [
+              {
+                $map: {
+                  input: '$months1',
+                  as: 'm1',
                   in: {
-                    $cond: [
-                      { $eq: ["$$t.month_year", "$$this.k"] },
-                      { $add: ["$$this.v", "$$value"] },
-                      { $add: [0, "$$value"] }
-                    ]
+                    count: 0,
+                    month_year: {
+                      $concat: [
+                        { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ['$$m1', 1] }] },
+                        '-',
+                        '$start_year'
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                $map: {
+                  input: '$months2',
+                  as: 'm2',
+                  in: {
+                    count: 0,
+                    month_year: {
+                      $concat: [
+                        { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ['$$m2', 1] }] },
+                        '-',
+                        '$end_year'
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          data: {
+            $map: {
+              input: '$template_data',
+              as: 't',
+              in: {
+                k: '$$t.month_year',
+                v: {
+                  $reduce: {
+                    input: '$data',
+                    initialValue: 0,
+                    in: {
+                      $cond: [
+                        { $eq: ['$$t.month_year', '$$this.k'] },
+                        { $add: ['$$this.v', '$$value'] },
+                        { $add: [0, '$$value'] }
+                      ]
+                    }
                   }
                 }
               }
             }
           }
         }
+      },
+      {
+        $project: {
+          data: { $arrayToObject: '$data' },
+          _id: 0
+        }
       }
-    },
-    {
-      $project: {
-        data: { $arrayToObject: "$data" },
-        _id: 0
+    ];
+
+    const vendorPipeLine = [
+      {
+        $match: {
+          adminId: new mongoose.Types.ObjectId(adminId),
+          createdAt: { $gte: YEAR_BEFORE, $lte: TODAY }
+        }
+      },
+      {
+        $group: {
+          _id: { year_month: { $substrCP: ['$createdAt', 0, 7] } },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { '_id.year_month': 1 }
+      },
+      {
+        $project: {
+          _id: 0,
+          count: 1,
+          month_year: {
+            $concat: [
+              { $arrayElemAt: [MONTHS_ARRAY, { $subtract: [{ $toInt: { $substrCP: ['$_id.year_month', 5, 2] } }, 1] }] },
+              '-',
+              { $substrCP: ['$_id.year_month', 0, 4] }
+            ]
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          data: { $push: { k: '$month_year', v: '$count' } }
+        }
+      },
+      {
+        $addFields: {
+          start_year: { $substrCP: [YEAR_BEFORE, 0, 4] },
+          end_year: { $substrCP: [TODAY, 0, 4] },
+          months1: { $range: [{ $toInt: { $substrCP: [YEAR_BEFORE, 5, 2] } }, { $add: [LAST_MONTH, 1] }] },
+          months2: { $range: [FIRST_MONTH, { $add: [{ $toInt: { $substrCP: [TODAY, 5, 2] } }, 1] }] }
+        }
+      },
+      {
+        $addFields: {
+          template_data: {
+            $concatArrays: [
+              {
+                $map: {
+                  input: '$months1',
+                  as: 'm1',
+                  in: {
+                    count: 0,
+                    month_year: {
+                      $concat: [
+                        { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ['$$m1', 1] }] },
+                        '-',
+                        '$start_year'
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                $map: {
+                  input: '$months2',
+                  as: 'm2',
+                  in: {
+                    count: 0,
+                    month_year: {
+                      $concat: [
+                        { $arrayElemAt: [MONTHS_ARRAY, { $subtract: ['$$m2', 1] }] },
+                        '-',
+                        '$end_year'
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          data: {
+            $map: {
+              input: '$template_data',
+              as: 't',
+              in: {
+                k: '$$t.month_year',
+                v: {
+                  $reduce: {
+                    input: '$data',
+                    initialValue: 0,
+                    in: {
+                      $cond: [
+                        { $eq: ['$$t.month_year', '$$this.k'] },
+                        { $add: ['$$this.v', '$$value'] },
+                        { $add: [0, '$$value'] }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          data: { $arrayToObject: '$data' },
+          _id: 0
+        }
       }
-    }]
+    ];
+
+    
+    let hostelIds = await HostelAdmin.findById(adminId, { hosteldata: 1 });
+    hostelIds = hostelIds.hosteldata.map((hostel) => {
+      return hostel.hostelId;
+    });
 
     const userChart = await Student.aggregate(pipeLine);
-    const hostelChart = await HostelInfo.aggregate(pipeLine)
+    const hostelChart = await HostelInfo.aggregate([
+      {$match:{
+      adminData:new mongoose.Types.ObjectId(adminId)
+      }},...pipeLine
+    ])
     const paymentChart = await Payment.aggregate(pipeLine);
     const vacateChart = await Vacate.aggregate(pipeLine)
 
