@@ -382,7 +382,7 @@ export const vacatingLetter = async (req, res, next) => {
       res.status(400).json({ error: "Please pay the rent before vacating." })
     } else {
 
-    }
+    
 
     await VacatingLetter.create([
       {
@@ -409,6 +409,7 @@ export const vacatingLetter = async (req, res, next) => {
       message:
         "success"
     });
+  }
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

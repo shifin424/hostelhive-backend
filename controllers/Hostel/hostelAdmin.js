@@ -509,7 +509,7 @@ export const fetchRoomData = async (req, res, next) => {
 // hostel student data
 export const studentRequestData = async (req, res, next) => {
   try {
-    const hostelId = req?.params?.id
+    const hostelId = req.params.id
     const StudentRequestData = await Student.find({ hostelId, isRequested: true, isVerified: false })
       .select(" address _id fullName email gender phone ")
       .populate('hostelId', "hostelName")

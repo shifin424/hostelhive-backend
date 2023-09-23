@@ -220,9 +220,21 @@ export const OtpVerification = async (req, res, next) => {
       }));
       return res.status(400).json({ errors });
     }
+
       if (!/^\d{6}$/.test(otp)) {
        res.status(400).json({ error: 'Invalid OTP format' });
     }
+
+    // const savedOtp = await Otp.findOne({ email });
+
+    // if (!savedOtp) {
+    //   return res.status(400).json({ error: 'OTP not found. Please request a new OTP.' });
+    // }
+    
+
+    // if (savedOtp.otp !== otp) {
+    //   return res.status(400).json({ error: 'Invalid OTP. Please enter the correct OTP.' });
+    // }
   
 
     const StudentAuth = await Student.create({
