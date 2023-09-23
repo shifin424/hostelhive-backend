@@ -1436,8 +1436,8 @@ export const updateRoomData = async (req, res, next) => {
 // room image edit
 export const editRoomImage = async (req, res, next) => {
   try {
-    const roomId = req?.params.id
-    const  {path,filename} = req?.file
+    const roomId = req.params.id
+    const  {path,filename} = req.file
     const roomData = await HostelRooms.findById(roomId)
     if(!roomData){
       res.status(400).json({error:"Room Does not exist"})
