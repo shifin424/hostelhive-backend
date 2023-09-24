@@ -19,7 +19,6 @@ dotenv.config();
 
 // signup data
 export const signUp = async (req, res, next) => {
-  console.log(req.body)
   try {
     const {
       fullName,
@@ -116,10 +115,10 @@ export const signUp = async (req, res, next) => {
         .json({ message: "User with this mobile number already exists" });
     }
 
-    // const otpSend = await sendOtp(mobileNumber);
-    // if (!otpSend) {
-    //   return res.status(500).json({ error: "Failed to send OTP" });
-    // }
+    const otpSend = await sendOtp(mobileNumber);
+    if (!otpSend) {
+      return res.status(500).json({ error: "Failed to send OTP" });
+    }
 
     const token = jwt.sign(
       { email, mobileNumber },
@@ -171,9 +170,8 @@ export const otpVerification = async (req, res) => {
       });
     }
 
-   // const otpVerify = await verifyOtp(mobileNumber, otpCode);
-    // if (otpVerify.status == "approved") {
-      if(otpCode){
+    const otpVerify = await verifyOtp(mobileNumber, otpCode);
+    if (otpVerify.status == "approved") {
       const adminExistsByEmail = await HostelAdmin.findOne({ email });
       if (adminExistsByEmail) {
         return res
