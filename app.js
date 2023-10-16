@@ -20,11 +20,11 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//app.use(errorHandler);
+
 app.use(
   cors({
     credentials: true,
-    origin: ['http://localhost:3000',"https://hostelhive.netlify.app","https://hostelhive.site/api/", "*"]
+    origin: ['http://localhost:3000',"https://hostelhive.netlify.app","https://hostelhive.site/api/"]
 
   })
 );
@@ -34,7 +34,7 @@ app.use("/api/admin", superadminRouter);
 app.use("/api/student",StudentRouter)
 app.use("/api",LandingPageRouter)
 
-
+//app.use(errorHandler);
 app.listen(process.env.PORT_NO, (error) => {
   if (error) {
     console.error('Error starting the server:', error);

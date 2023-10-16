@@ -206,7 +206,6 @@ export const adminDashboard = async (req,res,next) =>{
 //fetch chart data
 export const adminChartData = async (req,res,nest) =>{
   try{
-    
     const FIRST_MONTH = 1
     const LAST_MONTH = 12
     const TODAY = new Date()

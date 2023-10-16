@@ -10,18 +10,20 @@ const client = twilio(accountSID, authToken);
 
 
 export const sendOtp = (mobileNumber) => {
+  console.log(mobileNumber)
   const no = parseInt(mobileNumber)
   return new Promise((resolve, reject) => {
     client.verify.v2
       .services(serviceSID)
       .verifications.create({
-        to: `+91${no}`,
+        to:`+91${no}`,
         channel: "sms",
       })
       .then((result) => {
         resolve(result);
       })
       .catch((error) => {
+        console.log(error)
         reject({ status: error.status, message: error.message });
       });
   });
