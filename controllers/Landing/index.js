@@ -61,7 +61,7 @@ export const singleHostelView = async (req, res, next) => {
     };
     res.json(data);
   } catch (err) {
-    console.log(err);
+    console.log(err,"cout err");
     res.status(200).json({ err: 'Internal server error' })
   }
 };
