@@ -84,7 +84,6 @@ const studentSchema = new mongoose.Schema(
                 type: String,
             },
         },
-
         role: {
             type: String,
             enum: ["guest", "resident"],

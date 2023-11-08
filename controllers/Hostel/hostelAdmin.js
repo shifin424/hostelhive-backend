@@ -14,6 +14,8 @@ import Complaints from "../../models/complaints.js";
 import LeaveLetter from "../../models/LeaveLetter.js";
 import Payment from '../../models/payement.js'
 import Vacate from '../../models/vacatingLetter.js'
+import { sendMail } from "../../helpers/mailer.js";
+import Otp from '../../models/otp.js'
 
 dotenv.config();
 
@@ -114,11 +116,8 @@ export const signUp = async (req, res, next) => {
         .status(400)
         .json({ message: "User with this mobile number already exists" });
     }
-    console.log(mobileNumber,"mobilenumber")
-    const otpSend = await sendOtp(mobileNumber);
-    if (!otpSend) {
-      return res.status(500).json({ error: "Failed to send OTP" });
-    }
+ 
+    await sendMail(email,fullName)
 
     const token = jwt.sign(
       { email, mobileNumber },
@@ -170,8 +169,9 @@ export const otpVerification = async (req, res) => {
       });
     }
 
-   const otpVerify = await verifyOtp(mobileNumber, otpCode);
-    if (otpVerify.status == "approved") {
+    const otpDocument = await Otp.findOne({email,otp:otpCode})
+
+    if(otpDocument){
       const adminExistsByEmail = await HostelAdmin.findOne({ email });
       if (adminExistsByEmail) {
         return res
@@ -197,6 +197,8 @@ export const otpVerification = async (req, res) => {
         gender,
         password,
       });
+
+      await Otp.deleteOne({ email });
 
       if (hostelAdmin) {
         res.status(201).json({
@@ -1108,26 +1110,32 @@ export const getGlobalCount = async (req, res, next) => {
   try {
     const adminId = req.user.id;
 
-    let hostelIds = await HostelAdmin.findById(adminId, { hosteldata: 1 });
-    hostelIds = hostelIds.hosteldata.map((hostel) => {
-      return hostel.hostelId;
+    const adminData = await HostelAdmin.findById(adminId);
+
+    if (!adminData) {
+      return res.status(404).json({ error: 'Hostel admin not found' });
+    }
+
+    const hostelIds = adminData.hosteldata.map((hostel) => hostel.hostelId);
+
+    const studentCount = await Student.countDocuments({
+      hostelId: { $in: hostelIds },
     });
-    console.log(hostelIds);
 
-    const studentCount = await Student.find({
-      hostelId: { $in: hostelIds }, 
-    }).count();
-    const vacateCount = await Vacate.find().count();
-    const paymentCount = await Payment.find({
-      hostelId: { $in: hostelIds }, 
-    }).count();
-    console.log(paymentCount);
+    const vacatingCount = await VacatingLetter.countDocuments({
+      hostelId: { $in: hostelIds },
+    });
 
-    const hostelCount = await HostelInfo.find({ adminData: adminId }).count();
+    const paymentCount = await Payment.countDocuments({
+      hostelId: { $in: hostelIds },
+    });
 
-    res.status(200).json({ studentCount, vacateCount, paymentCount, hostelCount });
+    const hostelCount = hostelIds.length;
+
+    res.status(200).json({ studentCount, vacatingCount, paymentCount, hostelCount });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -1136,14 +1144,12 @@ export const getGlobalChart = async (req, res, next) => {
   try {
 
     const adminId = req.user.id;
-    
 
     const FIRST_MONTH = 1;
     const LAST_MONTH = 12;
     const TODAY = new Date();
     const YEAR_BEFORE = new Date(TODAY);
     YEAR_BEFORE.setFullYear(YEAR_BEFORE.getFullYear() - 1);
-    console.log(TODAY, YEAR_BEFORE);
     const MONTHS_ARRAY = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const pipeLine = [
       {
@@ -1399,6 +1405,9 @@ export const getGlobalChart = async (req, res, next) => {
     res.status(500).json({ error: "Internal server error" })
   }
 }
+
+
+
 
 
 // edit room data
